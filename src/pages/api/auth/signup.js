@@ -9,22 +9,41 @@ const schema = z.object({
   password: z.string().min(8).max(128),
 });
 
+function classifySignupError(error) {
+  const code = error?.code;
+  const message = String(error?.message || '');
+
+  if (code === 'P2002') return 'ACCOUNT_EXISTS';
+  if (code === 'P2021' || code === 'P2022') return 'DATABASE_SCHEMA_MISMATCH';
+  if (code === 'P1000' || code === 'P1001' || code === 'P1002' || code === 'P1017') return 'DATABASE_CONNECTION_ERROR';
+  if (/DATABASE_URL is not configured/i.test(message)) return 'DATABASE_CONFIG_ERROR';
+  if (/JWT_SECRET is not configured|ADMIN_JWT_SECRET is not configured/i.test(message)) return 'AUTH_CONFIG_ERROR';
+
+  return 'SIGNUP_FAILED';
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const parsed = schema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: 'Enter a valid name, email and password of at least 8 characters.' });
+  if (!parsed.success) {
+    return res.status(400).json({
+      error: 'Enter a valid name, email and password of at least 8 characters.',
+      code: 'VALIDATION_ERROR',
+    });
+  }
 
   const { email, name, password } = parsed.data;
   try {
-    const existing = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
-    if (existing) return res.status(409).json({ error: 'An account already exists with this email.' });
+    const normalizedEmail = email.toLowerCase();
+    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    if (existing) return res.status(409).json({ error: 'An account already exists with this email.', code: 'ACCOUNT_EXISTS' });
 
     const passwordHash = await bcrypt.hash(password, 12);
     const user = await prisma.$transaction(async (tx) => {
-      const created = await tx.user.create({
+      return tx.user.create({
         data: {
-          email: email.toLowerCase(),
+          email: normalizedEmail,
           firstName: name.split(/\s+/)[0],
           lastName: name.split(/\s+/).slice(1).join(' ') || null,
           passwordHash,
@@ -38,14 +57,33 @@ export default async function handler(req, res) {
         },
         select: { id: true, email: true, firstName: true, lastName: true },
       });
-      return created;
     });
 
     const token = await createAuthToken(user.id);
-    res.setHeader('Set-Cookie', `token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800`);
-    return res.status(201).json({ user: { ...user, name: [user.firstName, user.lastName].filter(Boolean).join(' ') } });
+    res.setHeader(
+      'Set-Cookie',
+      `token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800`,
+    );
+
+    return res.status(201).json({
+      user: {
+        ...user,
+        name: [user.firstName, user.lastName].filter(Boolean).join(' '),
+      },
+    });
   } catch (error) {
-    console.error('signup error', error);
-    return res.status(500).json({ error: 'Unable to create your account right now.' });
+    const code = classifySignupError(error);
+    console.error('signup error', {
+      code,
+      name: error?.name,
+      prismaCode: error?.code,
+      message: error?.message,
+    });
+
+    const status = code === 'ACCOUNT_EXISTS' ? 409 : 500;
+    return res.status(status).json({
+      error: 'Unable to create your account right now.',
+      code,
+    });
   }
 }
