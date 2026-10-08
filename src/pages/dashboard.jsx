@@ -96,9 +96,9 @@ const styles = {
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, marginBottom: 24 },
   logo: { fontSize: 24 }, muted: { color: '#6b7280', margin: '6px 0' },
   actions: { display: 'flex', gap: 8 }, hero: { padding: 28, borderRadius: 20, background: '#111827', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 20, marginBottom: 20 },
-  hero h1: { fontSize: 38, margin: '4px 0' }, quick: { display: 'flex', gap: 10 }, grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))', gap: 18 },
+  'hero h1': { fontSize: 38, margin: '4px 0' }, quick: { display: 'flex', gap: 10 }, grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))', gap: 18 },
   card: { border: '1px solid #e5e7eb', borderRadius: 18, padding: 20, background: '#fff' }, row: { display: 'flex', justifyContent: 'space-between', gap: 12, padding: '14px 0', borderBottom: '1px solid #f0f0f0' },
-  notice: { padding: '12px 0', borderBottom: '1px solid #f0f0f0' }, notice p: { margin: '5px 0', color: '#555' },
+  notice: { padding: '12px 0', borderBottom: '1px solid #f0f0f0' }, 'notice p': { margin: '5px 0', color: '#555' },
   button: { border: 0, borderRadius: 10, padding: '11px 16px', background: '#fff', color: '#111827', fontWeight: 700, cursor: 'pointer' },
   secondary: { border: '1px solid #d1d5db', borderRadius: 10, padding: '10px 14px', background: '#fff', cursor: 'pointer' },
   link: { border: 0, background: 'transparent', textDecoration: 'underline', cursor: 'pointer' }, alert: { padding: 14, background: '#fff3cd', borderRadius: 12, marginBottom: 18 }
