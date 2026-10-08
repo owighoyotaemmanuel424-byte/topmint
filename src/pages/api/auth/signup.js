@@ -25,8 +25,8 @@ export default async function handler(req, res) {
       const created = await tx.user.create({
         data: {
           email: email.toLowerCase(),
-          firstName: name.split(/\\s+/)[0],
-          lastName: name.split(/\\s+/).slice(1).join(' ') || null,
+          firstName: name.split(/\s+/)[0],
+          lastName: name.split(/\s+/).slice(1).join(' ') || null,
           passwordHash,
           wallet: { create: { currency: 'NGN' } },
           notifications: {
