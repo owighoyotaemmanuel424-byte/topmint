@@ -25,7 +25,8 @@ export default async function handler(req, res) {
       const created = await tx.user.create({
         data: {
           email: email.toLowerCase(),
-          name,
+          firstName: name.split(/\\s+/)[0],
+          lastName: name.split(/\\s+/).slice(1).join(' ') || null,
           passwordHash,
           wallet: { create: { currency: 'NGN' } },
           notifications: {
@@ -35,14 +36,14 @@ export default async function handler(req, res) {
             },
           },
         },
-        select: { id: true, email: true, name: true },
+        select: { id: true, email: true, firstName: true, lastName: true },
       });
       return created;
     });
 
     const token = await createAuthToken(user.id);
     res.setHeader('Set-Cookie', `token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800`);
-    return res.status(201).json({ user });
+    return res.status(201).json({ user: { ...user, name: [user.firstName, user.lastName].filter(Boolean).join(' ') } });
   } catch (error) {
     console.error('signup error', error);
     return res.status(500).json({ error: 'Unable to create your account right now.' });
