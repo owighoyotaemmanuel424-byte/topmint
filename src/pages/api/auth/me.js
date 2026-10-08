@@ -9,10 +9,10 @@ export default async function handler(req, res) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
-      id: true, email: true, name: true, phone: true, status: true, createdAt: true,
+      id: true, email: true, firstName: true, lastName: true, phone: true, status: true, createdAt: true,
       wallet: { select: { balance: true, currency: true } },
     },
   });
   if (!user || user.status !== 'ACTIVE') return res.status(401).json({ error: 'Unauthorized' });
-  return res.status(200).json({ user });
+  return res.status(200).json({ user: { ...user, name: [user.firstName, user.lastName].filter(Boolean).join(' ') } });
 }
