@@ -8,11 +8,41 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-enum UserStatus { ACTIVE SUSPENDED PENDING }
-enum AdminRole { SUPER_ADMIN ADMIN SUPPORT }
-enum TransactionType { DEPOSIT WITHDRAWAL INVESTMENT RETURN REFUND FEE ADJUSTMENT }
-enum TransactionStatus { PENDING PROCESSING COMPLETED FAILED CANCELLED }
-enum InvestmentStatus { ACTIVE COMPLETED CANCELLED }
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  SUPPORT
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  INVESTMENT
+  RETURN
+  REFUND
+  FEE
+  ADJUSTMENT
+}
+
+enum TransactionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum InvestmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
 
 model User {
   id String @id @default(cuid())
