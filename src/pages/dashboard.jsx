@@ -84,7 +84,7 @@ export default function Dashboard() {
 
           <section style={styles.card}><h2>Recent transactions</h2>{transactions.length ? transactions.map(item => <div key={item.id} style={styles.row}><div><strong>{item.type}</strong><p style={styles.muted}>{item.description || item.reference} · {new Date(item.createdAt).toLocaleDateString()}</p></div><strong>₦{money(item.amount)}</strong></div>) : <p style={styles.muted}>No transactions yet.</p>}</section>
 
-          <section style={styles.card}><h2>Notifications {unread ? <small>({unread} unread)</small> : null}</h2>{notifications.length ? notifications.slice(0, 5).map(item => <div key={item.id} style={styles.notice}><div><strong>{item.title}</strong><p>{item.message}</p></div>{!item.read && <button onClick={() => markRead(item.id)} style={styles.link}>Mark read</button>}</div>) : <p style={styles.muted}>You're all caught up.</p>}</section>
+          <section style={styles.card}><h2>Notifications {unread ? <small>({unread} unread)</small> : null}</h2>{notifications.length ? notifications.slice(0, 5).map(item => <div key={item.id} style={styles.notice}><div><strong>{item.title}</strong><p>{item.message}</p></div>{!item.read && <button onClick={() => markRead(item.id)} style={styles.link}>Mark read</button>}</div>) : <p style={styles.muted}>You&apos;re all caught up.</p>}</section>
         </div>
       </main>
     </>
