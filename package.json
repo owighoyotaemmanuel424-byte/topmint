@@ -16,19 +16,20 @@
   },
   "dependencies": {
     "@emailjs/browser": "^3.11.0",
-    "@prisma/client": "6.19.3",
     "@prisma/adapter-neon": "6.19.3",
+    "@prisma/client": "6.19.3",
+    "bcryptjs": "^3.0.2",
     "eslint": "8.35.0",
     "framer-motion": "^10.3.1",
+    "jose": "^6.1.0",
     "next": "13.2.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "swr": "^2.1.1",
-    "bcryptjs": "^3.0.2",
-    "jose": "^6.1.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "eslint-config-next": "^13.2.4",
     "prisma": "6.19.3"
   }
 }
