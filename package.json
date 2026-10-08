@@ -1,22 +1,30 @@
 {
-  "name": "quadverse",
+  "name": "topmint",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:generate": "prisma generate",
+    "db:validate": "prisma validate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@emailjs/browser": "^3.11.0",
+    "@prisma/client": "6.19.3",
+    "@prisma/adapter-neon": "6.19.3",
     "eslint": "8.35.0",
-    "eslint-config-next": "13.2.4",
-    "firebase": "^10.7.2",
     "framer-motion": "^10.3.1",
     "next": "13.2.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "swr": "^2.1.1"
+  },
+  "devDependencies": {
+    "prisma": "6.19.3"
   }
 }
