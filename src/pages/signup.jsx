@@ -23,7 +23,7 @@ const Signup = () => {
         body: JSON.stringify(form),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Unable to create your account.');
+      if (!response.ok) {\n        const messages = {\n          DATABASE_CONFIG_ERROR: 'Account service is not connected to the database yet. Please try again shortly.',\n          DATABASE_SCHEMA_MISMATCH: 'The account database needs its latest migration. Please try again after deployment finishes.',\n          DATABASE_CONNECTION_ERROR: 'The account database is temporarily unavailable. Please try again shortly.',\n          AUTH_CONFIG_ERROR: 'Account authentication is not configured correctly. Please contact support.',\n          ACCOUNT_EXISTS: 'An account already exists with this email.',\n          VALIDATION_ERROR: 'Please enter a valid name, email and password of at least 8 characters.',\n        };\n        throw new Error(messages[data.code] || data.error || 'Unable to create your account.');\n      }
       sessionStorage.setItem('activeUser', JSON.stringify(data.user));
       e.target.reset();
       router.push(registerFromPath || '/dashboard');
