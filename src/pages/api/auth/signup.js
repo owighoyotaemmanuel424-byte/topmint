@@ -1,0 +1,50 @@
+import bcrypt from 'bcryptjs';
+import { z } from 'zod';
+import { prisma } from '../../../lib/db/prisma';
+import { createAuthToken } from '../../../lib/auth';
+
+const schema = z.object({
+  email: z.string().trim().email().max(254),
+  name: z.string().trim().min(2).max(120),
+  password: z.string().min(8).max(128),
+});
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const parsed = schema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: 'Enter a valid name, email and password of at least 8 characters.' });
+
+  const { email, name, password } = parsed.data;
+  try {
+    const existing = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+    if (existing) return res.status(409).json({ error: 'An account already exists with this email.' });
+
+    const passwordHash = await bcrypt.hash(password, 12);
+    const user = await prisma.$transaction(async (tx) => {
+      const created = await tx.user.create({
+        data: {
+          email: email.toLowerCase(),
+          name,
+          passwordHash,
+          wallet: { create: { currency: 'NGN' } },
+          notifications: {
+            create: {
+              title: 'Welcome to TopMint',
+              message: 'Your account has been created successfully.',
+            },
+          },
+        },
+        select: { id: true, email: true, name: true },
+      });
+      return created;
+    });
+
+    const token = await createAuthToken(user.id);
+    res.setHeader('Set-Cookie', `token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800`);
+    return res.status(201).json({ user });
+  } catch (error) {
+    console.error('signup error', error);
+    return res.status(500).json({ error: 'Unable to create your account right now.' });
+  }
+}
