@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       principal: i.principal.toString(),
       expectedReturn: i.expectedReturn.toString(),
       actualReturn: i.actualReturn?.toString() ?? null,
-      plan: { ...i.plan, minAmount: i.plan.minAmount.toString(), maxAmount: i.plan.maxAmount.toString(), returnRate: i.plan.returnRate.toString() }
+      plan: { ...i.plan, minimumAmount: i.plan.minimumAmount.toString(), maximumAmount: i.plan.maximumAmount.toString(), returnRate: i.plan.returnRate.toString() }
     })) });
   }
 
@@ -31,7 +31,7 @@ export default async function handler(req, res) {
       const plan = await tx.investmentPlan.findUnique({ where: { id: parsed.data.planId } });
       if (!plan || !plan.active) throw new Error('Investment plan unavailable');
       const amount = new Prisma.Decimal(parsed.data.amount.toFixed(2));
-      if (amount.lessThan(plan.minAmount) || amount.greaterThan(plan.maxAmount)) throw new Error('Amount is outside this plan range');
+      if (amount.lessThan(plan.minimumAmount) || amount.greaterThan(plan.maximumAmount)) throw new Error('Amount is outside this plan range');
 
       const reference = 'INV-' + crypto.randomBytes(10).toString('hex').toUpperCase();
       const transaction = await debitWallet(tx, {
