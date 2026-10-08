@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
     const token = await createAuthToken(user.id);
     res.setHeader('Set-Cookie', `token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800`);
-    return res.status(200).json({ user: { id: user.id, email: user.email, name: user.name } });
+    return res.status(200).json({ user: { id: user.id, email: user.email, name: [user.firstName, user.lastName].filter(Boolean).join(' ') } });
   } catch (error) {
     console.error('signin error', error);
     return res.status(500).json({ error: 'Unable to sign in right now.' });
