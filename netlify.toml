@@ -2,5 +2,8 @@
   command = "npm run db:deploy && npm run build"
   publish = ".next"
 
+# The Neon driver adapter (@prisma/adapter-neon) queries the database over a
+# WebSocket. Node.js 20 has no global WebSocket and the project does not depend on
+# `ws`, so every database call fails at runtime on Node 20.
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "22"

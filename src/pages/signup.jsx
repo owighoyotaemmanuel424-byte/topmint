@@ -26,6 +26,7 @@ const Signup = () => {
       if (!response.ok) {
         const messages = {
           DATABASE_CONFIG_ERROR: 'Account service is not connected to the database yet. Please try again shortly.',
+          DATABASE_RUNTIME_ERROR: 'Account service is starting up. Please try again in a moment.',
           DATABASE_SCHEMA_MISMATCH: 'The account database needs its latest migration. Please try again after deployment finishes.',
           DATABASE_CONNECTION_ERROR: 'The account database is temporarily unavailable. Please try again shortly.',
           AUTH_CONFIG_ERROR: 'Account authentication is not configured correctly. Please contact support.',

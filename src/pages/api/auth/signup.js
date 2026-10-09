@@ -2,25 +2,13 @@ import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { prisma } from '../../../lib/db/prisma';
 import { createAuthToken } from '../../../lib/auth';
+import { classifyDatabaseError } from '../../../lib/db-error';
 
 const schema = z.object({
   email: z.string().trim().email().max(254),
   name: z.string().trim().min(2).max(120),
   password: z.string().min(8).max(128),
 });
-
-function classifySignupError(error) {
-  const code = error?.code;
-  const message = String(error?.message || '');
-
-  if (code === 'P2002') return 'ACCOUNT_EXISTS';
-  if (code === 'P2021' || code === 'P2022') return 'DATABASE_SCHEMA_MISMATCH';
-  if (code === 'P1000' || code === 'P1001' || code === 'P1002' || code === 'P1017') return 'DATABASE_CONNECTION_ERROR';
-  if (/DATABASE_URL is not configured/i.test(message)) return 'DATABASE_CONFIG_ERROR';
-  if (/JWT_SECRET is not configured|ADMIN_JWT_SECRET is not configured/i.test(message)) return 'AUTH_CONFIG_ERROR';
-
-  return 'SIGNUP_FAILED';
-}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -72,7 +60,7 @@ export default async function handler(req, res) {
       },
     });
   } catch (error) {
-    const code = classifySignupError(error);
+    const code = classifyDatabaseError(error, 'SIGNUP_FAILED');
     console.error('signup error', {
       code,
       name: error?.name,
