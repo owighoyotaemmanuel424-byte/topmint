@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 const money = (value, currency = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value || 0));
@@ -59,15 +60,15 @@ export default function Dashboard() {
     <Head><title>Overview | TopMint</title><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="theme-color" content="#071c18" /></Head>
     <main style={s.page}>
       <aside style={s.sidebar}>
-        <a href="/dashboard" style={s.brand}><span style={s.brandMark}>T</span><span>topmint<small>YOUR MONEY, IN VIEW</small></span></a>
+        <Link href="/dashboard" style={s.brand}><span style={s.brandMark}>T</span><span>topmint<small>YOUR MONEY, IN VIEW</small></span></Link>
         <p style={s.navLabel}>WORKSPACE</p>
-        <a style={{...s.navItem,...s.navActive}} href="/dashboard"><span>⌂</span> Overview</a>
-        <a style={s.navItem} href="/deposit"><span>＋</span> Add funds</a>
-        <a style={s.navItem} href="/withdraw"><span>↗</span> Withdraw</a>
-        <a style={s.navItem} href="/investments"><span>◫</span> Investments</a>
-        <a style={s.navItem} href="/transactions"><span>↔</span> Transactions</a>
-        <a style={s.navItem} href="/notifications"><span>♧</span> Notifications {unread > 0 && <b style={s.badge}>{unread}</b>}</a>
-        <div style={s.sidebarBottom}><a style={s.navItem} href="/profile"><span>◎</span> My profile</a><button onClick={logout} style={s.logout}>↪ Sign out</button><p style={s.secure}>● Secure customer portal</p></div>
+        <Link style={{...s.navItem,...s.navActive}} href="/dashboard"><span>⌂</span> Overview</Link>
+        <Link style={s.navItem} href="/deposit"><span>＋</span> Add funds</Link>
+        <Link style={s.navItem} href="/withdraw"><span>↗</span> Withdraw</Link>
+        <Link style={s.navItem} href="/investments"><span>◫</span> Investments</Link>
+        <Link style={s.navItem} href="/transactions"><span>↔</span> Transactions</Link>
+        <Link style={s.navItem} href="/notifications"><span>♧</span> Notifications {unread > 0 && <b style={s.badge}>{unread}</b>}</Link>
+        <div style={s.sidebarBottom}><Link style={s.navItem} href="/profile"><span>◎</span> My profile</Link><button onClick={logout} style={s.logout}>↪ Sign out</button><p style={s.secure}>● Secure customer portal</p></div>
       </aside>
       <section style={s.main}>
         <header style={s.topbar}><div><p style={s.kicker}>YOUR FINANCIAL SPACE</p><h1 style={s.pageTitle}>Overview</h1></div><div style={s.userBox}><div style={s.avatar}>{(user.name || user.email || 'T').charAt(0).toUpperCase()}</div><div><strong>{user.name || 'TopMint member'}</strong><small>{user.email}</small></div><button style={s.mobileSignout} onClick={logout}>Sign out</button></div></header>
@@ -97,7 +98,7 @@ export default function Dashboard() {
         </section>
         <footer style={s.footer}><span>© {new Date().getFullYear()} TopMint</span><span>USD is the platform's primary currency for new wallets. Historical balances retain their recorded currency.</span></footer>
       </section>
-      <nav style={s.mobileNav}><a href="/dashboard">⌂<small>Home</small></a><a href="/deposit">＋<small>Fund</small></a><a href="/investments">◫<small>Invest</small></a><a href="/transactions">↔<small>Activity</small></a><a href="/profile">◎<small>Profile</small></a></nav>
+      <nav style={s.mobileNav}><Link href="/dashboard">⌂<small>Home</small></Link><Link href="/deposit">＋<small>Fund</small></Link><Link href="/investments">◫<small>Invest</small></Link><Link href="/transactions">↔<small>Activity</small></Link><Link href="/profile">◎<small>Profile</small></Link></nav>
     </main>
   </>;
 }
@@ -166,7 +167,7 @@ const s = {
  'planInfo strong':{display:'block',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'},
  'planInfo small':{display:'block',fontSize:10,color:'#7e8b83',marginTop:4},
  arrowButton:{width:30,height:30,border:'1px solid #e3eae5',borderRadius:9,background:'#fff',color:'#246b4a',cursor:'pointer'},
- noticeBox:{display:'flex',gap:9;background:'#f6f8ee',borderRadius:12;padding:12,marginTop:14,color:'#66754f'},
+ noticeBox:{display:'flex',gap:9,background:'#f6f8ee',borderRadius:12;padding:12,marginTop:14,color:'#66754f'},
  'noticeBox p':{fontSize:10,lineHeight:1.6,margin:0},
  noticeRow:{display:'flex',alignItems:'flex-start',gap:11,padding:'12px 0',borderBottom:'1px solid #f0f3f1'},
  noticeDot:{width:7,height:7,borderRadius:10,marginTop:5,flexShrink:0},
