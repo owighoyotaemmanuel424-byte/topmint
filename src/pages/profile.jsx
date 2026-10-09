@@ -42,7 +42,7 @@ export default function Profile() {
         </header>
         <section style={styles.wallet}>
           <p style={styles.eyebrow}>WALLET BALANCE</p>
-          <h2 style={styles.balance}>{user.wallet?.currency || 'NGN'} {balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h2>
+          <h2 style={styles.balance}>{new Intl.NumberFormat('en-US', { style: 'currency', currency: user.wallet?.currency || 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(balance)}</h2>
           <p style={styles.caption}>Available wallet balance</p>
         </section>
         <section style={styles.account}>
