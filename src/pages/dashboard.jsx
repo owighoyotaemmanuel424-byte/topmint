@@ -49,7 +49,7 @@ export default function Dashboard() {
   };
 
   if (loading) return <main style={s.page}><div style={s.loading}><span style={s.brandMark}>T</span><p>Loading your TopMint account…</p></div></main>;
-  if (!user) return <main style={s.page}><div style={s.panel}><h2>We couldn't load your account</h2><p style={s.muted}>{error || 'Your session may have expired.'}</p><button style={s.primary} onClick={load}>Try again</button></div></main>;
+  if (!user) return <main style={s.page}><div style={s.panel}><h2>We couldn&apos;t load your account</h2><p style={s.muted}>{error || 'Your session may have expired.'}</p><button style={s.primary} onClick={load}>Try again</button></div></main>;
 
   const currency = wallet?.currency || 'USD';
   const unread = notifications.filter(n => !n.read).length;
@@ -90,13 +90,13 @@ export default function Dashboard() {
           </section>
           <section style={s.panel}><div style={s.sectionHead}><div><p style={s.kicker}>GROW WITH A PLAN</p><h2 style={s.sectionTitle}>Investment options</h2></div><button style={s.textLink} onClick={() => router.push('/investments')}>Explore ↗</button></div>
             {plans.length ? plans.slice(0,4).map(plan => <div key={plan.id} style={s.planRow}><div style={s.planIcon}>✳</div><div style={s.planInfo}><strong>{plan.name}</strong><small>{plan.durationDays} days · {plan.returnRate}% stated rate</small><small>From {money(plan.minimumAmount, currency)}</small></div><button style={s.arrowButton} aria-label={'View '+plan.name} onClick={() => router.push('/investments')}>↗</button></div>) : <div style={s.emptySmall}>No investment plans are available right now.</div>}
-            <div style={s.noticeBox}><span>ⓘ</span><p>Review each plan's terms, risks, fees and withdrawal conditions before investing. Returns are not guaranteed unless explicitly stated in the applicable terms.</p></div>
+            <div style={s.noticeBox}><span>ⓘ</span><p>Review each plan&apos;s terms, risks, fees and withdrawal conditions before investing. Returns are not guaranteed unless explicitly stated in the applicable terms.</p></div>
           </section>
         </div>
         <section style={s.panel}><div style={s.sectionHead}><div><p style={s.kicker}>STAY INFORMED</p><h2 style={s.sectionTitle}>Notifications {unread > 0 && <span style={s.unread}>{unread} new</span>}</h2></div><button style={s.textLink} onClick={() => router.push('/notifications')}>All notifications ↗</button></div>
-          {notifications.length ? notifications.slice(0,3).map(n => <div key={n.id} style={s.noticeRow}><span style={{...s.noticeDot,background:n.read?'#d1d5db':'#1c8b67'}}/><div style={{flex:1}}><strong>{n.title}</strong><p>{n.message}</p><small>{date(n.createdAt)}</small></div>{!n.read && <button style={s.textLink} onClick={() => markRead(n.id)}>Mark read</button>}</div>) : <p style={s.muted}>You're all caught up. New account updates will appear here.</p>}
+          {notifications.length ? notifications.slice(0,3).map(n => <div key={n.id} style={s.noticeRow}><span style={{...s.noticeDot,background:n.read?'#d1d5db':'#1c8b67'}}/><div style={{flex:1}}><strong>{n.title}</strong><p>{n.message}</p><small>{date(n.createdAt)}</small></div>{!n.read && <button style={s.textLink} onClick={() => markRead(n.id)}>Mark read</button>}</div>) : <p style={s.muted}>You&apos;re all caught up. New account updates will appear here.</p>}
         </section>
-        <footer style={s.footer}><span>© {new Date().getFullYear()} TopMint</span><span>USD is the platform's primary currency for new wallets. Historical balances retain their recorded currency.</span></footer>
+        <footer style={s.footer}><span>© {new Date().getFullYear()} TopMint</span><span>USD is the platform&apos;s primary currency for new wallets. Historical balances retain their recorded currency.</span></footer>
       </section>
       <nav style={s.mobileNav}><Link href="/dashboard">⌂<small>Home</small></Link><Link href="/deposit">＋<small>Fund</small></Link><Link href="/investments">◫<small>Invest</small></Link><Link href="/transactions">↔<small>Activity</small></Link><Link href="/profile">◎<small>Profile</small></Link></nav>
     </main>
@@ -167,7 +167,7 @@ const s = {
  'planInfo strong':{display:'block',fontSize:12,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'},
  'planInfo small':{display:'block',fontSize:10,color:'#7e8b83',marginTop:4},
  arrowButton:{width:30,height:30,border:'1px solid #e3eae5',borderRadius:9,background:'#fff',color:'#246b4a',cursor:'pointer'},
- noticeBox:{display:'flex',gap:9,background:'#f6f8ee',borderRadius:12;padding:12,marginTop:14,color:'#66754f'},
+ noticeBox:{display:'flex',gap:9,background:'#f6f8ee',borderRadius:12,padding:12,marginTop:14,color:'#66754f'},
  'noticeBox p':{fontSize:10,lineHeight:1.6,margin:0},
  noticeRow:{display:'flex',alignItems:'flex-start',gap:11,padding:'12px 0',borderBottom:'1px solid #f0f3f1'},
  noticeDot:{width:7,height:7,borderRadius:10,marginTop:5,flexShrink:0},
