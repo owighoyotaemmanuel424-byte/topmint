@@ -1,6 +1,5 @@
-import { useState, useContext } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { themeContext } from '../../providers/ThemeProvider';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 
@@ -10,7 +9,6 @@ const Signin = () => {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ email: '', password: '' });
   const router = useRouter();
-  const { registerFromPath } = useContext(themeContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,8 +32,10 @@ const Signin = () => {
         throw new Error(messages[data.code] || data.error || 'Unable to sign in.');
       }
       sessionStorage.setItem('activeUser', JSON.stringify(data.user));
-      e.target.reset();
-      router.push(registerFromPath || '/dashboard');
+      // Always land on the customer dashboard. registerFromPath defaulted to "/",
+      // so every sign-in from the navbar bounced back to the marketing page and
+      // the dashboard looked unreachable.
+      router.replace('/dashboard');
     } catch (error) {
       setErrMsg(error.message);
     } finally {

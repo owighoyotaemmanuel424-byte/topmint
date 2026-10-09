@@ -1,0 +1,95 @@
+/* Responsive rules for the customer dashboard (/dashboard).
+
+   The dashboard is styled with inline style objects, which cannot express media
+   queries, so these class rules take over at narrow widths. `!important` is used
+   deliberately: an inline style beats a normal stylesheet rule, and the rules
+   below must win over the desktop layout they override. */
+
+@media (max-width: 980px) {
+  .tm-side {
+    display: none !important;
+  }
+
+  .tm-main {
+    width: 100% !important;
+    padding: 20px 16px 104px !important;
+  }
+
+  .tm-topbar {
+    flex-wrap: wrap !important;
+    gap: 14px !important;
+  }
+
+  .tm-signout {
+    display: inline-block !important;
+    margin-left: auto;
+  }
+
+  .tm-hero {
+    padding: 24px 20px 0 !important;
+  }
+
+  .tm-hero-symbol {
+    display: none !important;
+  }
+
+  .tm-content {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Bottom tab bar replaces the sidebar on small screens. */
+  .tm-mobile-nav {
+    display: flex !important;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    background: #071c18;
+    border-top: 1px solid #1d3931;
+    padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -8px 24px rgba(7, 28, 24, 0.25);
+  }
+
+  .tm-mobile-nav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    min-width: 56px;
+    padding: 6px 8px;
+    border-radius: 12px;
+    color: #bbcec6;
+    text-decoration: none;
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  .tm-mobile-nav a small {
+    font-size: 9px;
+    letter-spacing: 0.4px;
+  }
+
+  .tm-mobile-nav a:first-of-type {
+    color: #d1fa9c;
+  }
+}
+
+@media (max-width: 640px) {
+  .tm-stats {
+    grid-template-columns: 1fr !important;
+  }
+
+  .tm-topbar h1 {
+    font-size: 24px !important;
+  }
+
+  .tm-userbox small {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

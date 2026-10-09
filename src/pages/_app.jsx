@@ -1,5 +1,6 @@
 import '../styles/contact.css';
 import '../styles/dashboard.css';
+import '../styles/dashboard-app.css';
 import '../styles/signup.css';
 import '../styles/home.css';
 import '../styles/global.css';

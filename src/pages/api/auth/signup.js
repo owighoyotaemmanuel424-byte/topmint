@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { prisma } from '../../../lib/db/prisma';
-import { createAuthToken } from '../../../lib/auth';
+import { createAuthToken, customerSessionCookie } from '../../../lib/auth';
 import { classifyDatabaseError } from '../../../lib/db-error';
 
 const schema = z.object({
@@ -48,10 +48,7 @@ export default async function handler(req, res) {
     });
 
     const token = await createAuthToken(user.id);
-    res.setHeader(
-      'Set-Cookie',
-      `token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800`,
-    );
+    res.setHeader('Set-Cookie', customerSessionCookie(req, token));
 
     return res.status(201).json({
       user: {

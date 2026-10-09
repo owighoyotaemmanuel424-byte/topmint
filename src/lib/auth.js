@@ -24,6 +24,16 @@ export async function verifyAuthToken(token) {
   }
 }
 
+// HTTP-only, SameSite=Lax session cookie for the customer auth flow.
+// `Secure` is always set in production and whenever the request arrived over
+// HTTPS. It is dropped only on a plain-HTTP dev/preview origin, where a browser
+// refuses to store a Secure cookie and sign-in would silently fail.
+export function customerSessionCookie(req, token, maxAge = 604800) {
+  const proto = String(req?.headers?.['x-forwarded-proto'] || '').split(',')[0].trim();
+  const secure = process.env.NODE_ENV === 'production' || proto === 'https';
+  return `token=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${secure ? '; Secure' : ''}`;
+}
+
 export async function createAdminToken(adminId) {
   return new SignJWT({ sub: adminId, type: 'admin' })
     .setProtectedHeader({ alg: 'HS256' })

@@ -1,6 +1,5 @@
-import { useState, useContext } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { themeContext } from '../../providers/ThemeProvider';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 
@@ -10,7 +9,6 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const router = useRouter();
-  const { registerFromPath } = useContext(themeContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,8 +34,9 @@ const Signup = () => {
         throw new Error(messages[data.code] || data.error || 'Unable to create your account.');
       }
       sessionStorage.setItem('activeUser', JSON.stringify(data.user));
-      e.target.reset();
-      router.push(registerFromPath || '/dashboard');
+      // Registration signs the customer in with an HTTP-only cookie, so the next
+      // step is always the dashboard (registerFromPath defaulted to "/").
+      router.replace('/dashboard');
     } catch (error) {
       setErrMsg(error.message);
     } finally {
