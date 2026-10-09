@@ -128,76 +128,76 @@ const Testimonies = () => {
         </div>
         <div className="videograndCntn">
             <div className="videoTestimonies">
-                <div class="user_testimony">
+                <div className="user_testimony">
                     <h4>
                         &quot; Best trading platform ever with amazing and easy to use interface. I don&apos;t think I can sell their services enough, let my account balance do it for me.&quot;
                     </h4>
                     <p>
-                        <span class="color-blue">Henry dever</span> - United Kingdom
+                        <span className="color-blue">Henry dever</span> - United Kingdom
                     </p>
                 </div>
-                <div class="user_testimony">
+                <div className="user_testimony">
                     <h4>
                         &quot;This platform is the best I&apos;ll give them that, making decent amount of money week in week out and making withdrawals is just about as easy as they come. &quot;
                     </h4>
                     <p>
-                        <span class="color-blue">Sujani Devabathini Bandi</span> - India
+                        <span className="color-blue">Sujani Devabathini Bandi</span> - India
                     </p>
                 </div>
-                <div class="user_testimony">
+                <div className="user_testimony">
                     <h4>
                         &quot;I&apos;m so excited, I give gratitude to the entire staff of topmints Investment, I have received my profit of $4000, thank you all especially to my manager..&quot;
                     </h4>
                     <p>
-                        <span class="color-blue">Jordan brooks Thomas</span> - USA
+                        <span className="color-blue">Jordan brooks Thomas</span> - USA
                     </p>
                 </div>
-                <div class="user_testimony">
+                <div className="user_testimony">
                     <h4>
                         &quot;This is what you call online trading, I had doubt at first but I decided to try with just little and watched it grow to something big. Thank You topmints Investment. .&quot;
                     </h4>
                     <p>
-                        <span class="color-blue">Mary Matt&apos;s weiser</span> - USA
+                        <span className="color-blue">Mary Matt&apos;s weiser</span> - USA
                     </p>
                 </div>
-                <div class="user_testimony">
+                <div className="user_testimony">
                     <h4>
                         &quot;I&apos;ve joined a lot of trading websites. topmints Investment is the only one that has consistently made me profit in the long term. very happy customer and I will be buying Gold Plan this weekend so that should say it all!&quot;
                     </h4>
                     <p>
-                        <span class="color-blue">TASHA LEWIS</span> - South Africa
+                        <span className="color-blue">TASHA LEWIS</span> - South Africa
                     </p>
                 </div>
-                <div class="user_testimony">
+                <div className="user_testimony">
                     <h4>
                         &quot; Great service! I have been worried about investing. But when I came here. I don&apos;t have to worry anymore.&quot;
                     </h4>
                     <p>
-                        <span class="color-blue">JOY KELLY</span> - United Kingdom
+                        <span className="color-blue">JOY KELLY</span> - United Kingdom
                     </p>
                 </div>
-                <div class="user_testimony">
+                <div className="user_testimony">
                     <h4>
                     &quot; My brother recommended www.topmintinvest.com to me, and I am very happy to get profit by their trading service.&quot;
                     </h4>
                     <p>
-                        <span class="color-blue">BILLY MADAN</span> - USA
+                        <span className="color-blue">BILLY MADAN</span> - USA
                     </p>
                 </div>
-                <div class="user_testimony">
+                <div className="user_testimony">
                     <h4>
                         &quot;OMG! I only started using topmints Investment a month back and i just cannot belive by how much my balance has grown. www.topmintinvest.com Rocks! &quot;
                     </h4>
                     <p>
-                        <span class="color-blue">Jane Matthew</span> - Canada
+                        <span className="color-blue">Jane Matthew</span> - Canada
                     </p>
                 </div>
-                <div class="user_testimony">
+                <div className="user_testimony">
                     <h4>
                     &quot;This is one of the best companies I&apos;ve invested in, they give high profits and they are responsible for any loss. Thank you topmints Investment .&quot;
                     </h4>
                     <p>
-                        <span class="color-blue">Bongani Kubeka</span> - Botswana
+                        <span className="color-blue">Bongani Kubeka</span> - Botswana
                     </p>
                 </div>
             

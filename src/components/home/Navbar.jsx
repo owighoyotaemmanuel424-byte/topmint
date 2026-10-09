@@ -99,7 +99,7 @@ const Navbar = ({ showsidecard, setShowsideCard, shownavOptions, showDisplayCard
                                             <p>{currentUser?.idnum} | {currentUser?.accountStatus}</p>
                                         </div>
                                         <div className="bottomDisplay">
-                                            <Link href={currentUser?.admin ? "/dashboard_admin": "/profile" } title='profile'>Dashboard <i class="icofont-dashboard-web"></i></Link>
+                                            <Link href={currentUser?.admin ? "/dashboard_admin": "/profile" } title='profile'>Dashboard <i className="icofont-dashboard-web"></i></Link>
                                             <button type="button" title='log Out' onClick={handleLogOut}>Log Out <i className="icofont-logout"></i></button>
                                         </div>
                                     </motion.div>

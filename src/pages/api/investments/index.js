@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { getAuthenticatedUser } from '../../../lib/api-auth';
-import { withTransaction, debitWallet } from '../../../lib/ledger';
+import { withTransaction, debitWallet, publicErrorMessage } from '../../../lib/ledger';
 import { prisma } from '../../../lib/db/prisma';
 
 const bodySchema = z.object({ planId: z.string().min(1), amount: z.coerce.number().positive() });
@@ -54,6 +54,6 @@ export default async function handler(req, res) {
 
     return res.status(201).json({ investment: { ...result, principal: result.principal.toString(), expectedReturn: result.expectedReturn.toString() } });
   } catch (error) {
-    return res.status(400).json({ error: error.message || 'Investment failed' });
+    return res.status(400).json({ error: publicErrorMessage(error, 'Investment failed') });
   }
 }

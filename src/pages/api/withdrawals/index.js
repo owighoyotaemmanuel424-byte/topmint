@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { getAuthenticatedUser } from '../../../lib/api-auth';
-import { withTransaction } from '../../../lib/ledger';
+import { withTransaction, publicErrorMessage } from '../../../lib/ledger';
 import { prisma } from '../../../lib/db/prisma';
 
 const schema = z.object({
@@ -43,6 +43,6 @@ export default async function handler(req, res) {
     });
     return res.status(201).json({ withdrawal: { ...result.withdrawal, amount: result.withdrawal.amount.toString(), fee: result.withdrawal.fee.toString() }, reference: result.reference });
   } catch (error) {
-    return res.status(400).json({ error: error.message || 'Withdrawal failed' });
+    return res.status(400).json({ error: publicErrorMessage(error, 'Withdrawal failed') });
   }
 }

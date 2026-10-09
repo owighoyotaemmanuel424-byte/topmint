@@ -80,7 +80,7 @@ export default function Dashboard() {
         <div style={styles.grid}>
           <section style={styles.card}><h2>Active investments</h2>{investments.length ? investments.map(item => <div key={item.id} style={styles.row}><div><strong>{item.plan?.name}</strong><p style={styles.muted}>Matures {new Date(item.maturityAt).toLocaleDateString()}</p></div><strong>₦{money(item.principal)}</strong></div>) : <p style={styles.muted}>No active investments yet.</p>}</section>
 
-          <section style={styles.card}><h2>Investment plans</h2>{plans.length ? plans.slice(0, 4).map(plan => <div key={plan.id} style={styles.row}><div><strong>{plan.name}</strong><p style={styles.muted}>{plan.durationDays} days · {plan.returnRate}% target return</p></div><span>₦{money(plan.minAmount)}+</span></div>) : <p style={styles.muted}>No active plans are available.</p>}</section>
+          <section style={styles.card}><h2>Investment plans</h2>{plans.length ? plans.slice(0, 4).map(plan => <div key={plan.id} style={styles.row}><div><strong>{plan.name}</strong><p style={styles.muted}>{plan.durationDays} days · {plan.returnRate}% target return</p></div><span>₦{money(plan.minimumAmount)}+</span></div>) : <p style={styles.muted}>No active plans are available.</p>}</section>
 
           <section style={styles.card}><h2>Recent transactions</h2>{transactions.length ? transactions.map(item => <div key={item.id} style={styles.row}><div><strong>{item.type}</strong><p style={styles.muted}>{item.description || item.reference} · {new Date(item.createdAt).toLocaleDateString()}</p></div><strong>₦{money(item.amount)}</strong></div>) : <p style={styles.muted}>No transactions yet.</p>}</section>
 

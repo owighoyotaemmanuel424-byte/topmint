@@ -214,7 +214,7 @@ export default function Home() {
                     <Link href={currentUser?.id ? "/profile#packages" : "/signup"} className="borderBtn">Invest</Link>
                   </div>
                   <div className="unitPackage fancybg">
-                    <h3>DIAMOND <i class="icofont-diamond"></i></h3>
+                    <h3>DIAMOND <i className="icofont-diamond"></i></h3>
                     <h4><span>$10,000</span> <br /> - <br /> <span>$100,000</span></h4>
                     <ul>
                       <li><i className="icofont-tick-mark"></i> <span>10X ROI</span></li>

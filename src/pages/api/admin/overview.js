@@ -1,9 +1,10 @@
 import { prisma } from '../../../lib/db/prisma';
-import { verifyAdminToken } from '../../../lib/auth';
+import { requireAdmin } from '../../../lib/admin-auth';
 
 export default async function handler(req,res){
  if(req.method!=='GET')return res.status(405).json({error:'Method not allowed'});
- const adminId=await verifyAdminToken(req.cookies?.admin_token); if(!adminId)return res.status(401).json({error:'Unauthorized'});
+ const admin = await requireAdmin(req, res, ['SUPER_ADMIN', 'ADMIN', 'SUPPORT']);
+ if (!admin) return;
  try{
   const [users,investments,withdrawals,pendingWithdrawals]=await Promise.all([
    prisma.user.count(),prisma.investment.count(),prisma.withdrawal.count(),prisma.withdrawal.count({where:{status:'PENDING'}})

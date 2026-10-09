@@ -55,7 +55,7 @@ const Contact = () => {
         </section>
         <div className="preSect">
             <Link href={"/"}>Home</Link>
-            <span><i class="icofont-rounded-right"></i></span>
+            <span><i className="icofont-rounded-right"></i></span>
             <p>Contact</p>
         </div>
         <div className="contactFormCntn">

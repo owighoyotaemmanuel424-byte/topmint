@@ -11,7 +11,9 @@ export async function getAuthenticatedUser(req) {
   const token = getCookie(req, 'token');
   const id = await verifyAuthToken(token);
   if (!id) return null;
-  return prisma.user.findUnique({ where: { id } });
+  // Only active accounts may act on authenticated endpoints. Without this check a
+  // suspended user with an unexpired token could still deposit, withdraw and invest.
+  return prisma.user.findFirst({ where: { id, status: 'ACTIVE' } });
 }
 
 export async function getAuthenticatedAdmin(req) {

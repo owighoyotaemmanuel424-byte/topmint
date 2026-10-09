@@ -44,7 +44,7 @@ const About = () => {
         </section>
         <div className="preSect">
             <Link href={"/"}>Home</Link>
-            <span><i class="icofont-rounded-right"></i></span>
+            <span><i className="icofont-rounded-right"></i></span>
             <p>About</p>
         </div>
         <section id="about" className="about">
