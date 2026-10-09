@@ -35,7 +35,7 @@ export default async function handler(req, res) {
           firstName: name.split(/\s+/)[0],
           lastName: name.split(/\s+/).slice(1).join(' ') || null,
           passwordHash,
-          wallet: { create: { currency: 'NGN' } },
+          wallet: { create: { currency: 'USD' } },
           notifications: {
             create: {
               title: 'Welcome to TopMint',
