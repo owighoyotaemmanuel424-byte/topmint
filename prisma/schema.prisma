@@ -84,7 +84,7 @@ model Wallet {
   id String @id @default(cuid())
   userId String @unique
   balance Decimal @default(0) @db.Decimal(20,2)
-  currency String @default("NGN")
+  currency String @default("USD")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -148,7 +148,7 @@ model Transaction {
   type TransactionType
   status TransactionStatus @default(PENDING)
   amount Decimal @db.Decimal(20,2)
-  currency String @default("NGN")
+  currency String @default("USD")
   description String?
   metadata Json?
   createdAt DateTime @default(now())
