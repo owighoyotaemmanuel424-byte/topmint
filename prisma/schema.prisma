@@ -44,6 +44,19 @@ enum InvestmentStatus {
   CANCELLED
 }
 
+enum NotificationType {
+  ACCOUNT
+  DEPOSIT
+  WITHDRAWAL
+  INVESTMENT
+  INVESTMENT_MATURITY
+  INVESTMENT_EARNING
+  PAYMENT
+  SECURITY
+  ACCOUNT_UPDATE
+  ANNOUNCEMENT
+}
+
 model User {
   id String @id @default(cuid())
   email String @unique
@@ -160,6 +173,7 @@ model Transaction {
   withdrawal Withdrawal?
   @@index([userId, createdAt])
   @@index([type, status])
+  @@index([userId, status, createdAt])
   @@index([investmentId])
 }
 
@@ -202,12 +216,26 @@ model Withdrawal {
 model Notification {
   id String @id @default(cuid())
   userId String
+  type NotificationType @default(ACCOUNT)
   title String
   message String
+  // Points at the record the notification is about (for example resourceType
+  // "Transaction" with resourceId being the transaction id). Optional because
+  // general account and announcement notifications reference nothing.
+  resourceType String?
+  resourceId String?
+  link String?
+  // Deterministic key for the business event that produced this notification.
+  // The unique constraint below makes notification creation idempotent, so a
+  // retried deposit, investment or announcement cannot notify twice.
+  eventKey String?
   read Boolean @default(false)
+  readAt DateTime?
   createdAt DateTime @default(now())
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([userId, eventKey])
   @@index([userId, read, createdAt])
+  @@index([userId, type, createdAt])
 }
 
 model AuditLog {
