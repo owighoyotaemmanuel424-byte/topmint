@@ -6,9 +6,9 @@ export default async function handler(req,res){
  const admin = await requireAdmin(req, res, ['SUPER_ADMIN', 'ADMIN', 'SUPPORT']);
  if (!admin) return;
  try{
-  const [users,investments,withdrawals,pendingWithdrawals]=await Promise.all([
-   prisma.user.count(),prisma.investment.count(),prisma.withdrawal.count(),prisma.withdrawal.count({where:{status:'PENDING'}})
+  const [users,investments,withdrawals,pendingWithdrawals,pendingDeposits]=await Promise.all([
+   prisma.user.count(),prisma.investment.count(),prisma.withdrawal.count(),prisma.withdrawal.count({where:{status:'PENDING'}}),prisma.deposit.count({where:{status:'PENDING'}})
   ]);
-  return res.status(200).json({counts:{users,investments,withdrawals,pendingWithdrawals}});
+  return res.status(200).json({counts:{users,investments,withdrawals,pendingWithdrawals,pendingDeposits}});
  }catch(e){console.error('admin overview',e);return res.status(500).json({error:'Unable to load dashboard.'})}
 }
