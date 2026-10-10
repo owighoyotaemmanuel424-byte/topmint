@@ -2,16 +2,12 @@ import crypto from 'crypto';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { getAuthenticatedUser } from '../../../lib/api-auth';
-import { withTransaction } from '../../../lib/ledger';
+import { withTransaction, formatUsd } from '../../../lib/ledger';
+import { notify } from '../../../lib/notifications';
 import { prisma } from '../../../lib/db/prisma';
 import { respondWithError } from '../../../lib/db-error';
 
-const schema = z.object({
-  amount: z.coerce.number()
-    .positive()
-    .max(100000000)
-    .refine(value => Number(value.toFixed(2)) >= 0.01, 'Amount must be at least $0.01')
-});
+const schema = z.object({ amount: z.coerce.number().positive().max(100000000).refine(value => Number(value.toFixed(2)) >= 0.01, 'Amount must be at least $0.01') });
 
 export default async function handler(req, res) {
   const user = await getAuthenticatedUser(req);
@@ -31,7 +27,7 @@ export default async function handler(req, res) {
 
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const parsed = schema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: 'Invalid deposit amount. The minimum is $0.01.' });
+  if (!parsed.success) return res.status(400).json({ error: 'Invalid deposit amount' });
 
   try {
     const amount = new Prisma.Decimal(parsed.data.amount.toFixed(2));
@@ -42,6 +38,21 @@ export default async function handler(req, res) {
       });
       return tx.deposit.create({ data: { userId: user.id, transactionId: transaction.id, provider: 'MANUAL', amount, status: 'PENDING' } });
     });
+
+    // Written after the financial transaction commits: a notification failure can
+    // never undo the deposit record, and the event key makes a retried request
+    // idempotent instead of producing a second notification.
+    await notify(prisma, {
+      userId: user.id,
+      type: 'DEPOSIT',
+      title: 'Deposit request received',
+      message: `We received your deposit request for ${formatUsd(result.amount)}. Your wallet is credited once the payment is verified.`,
+      resourceType: 'Transaction',
+      resourceId: result.transactionId,
+      link: '/transactions',
+      eventKey: `deposit:created:${result.id}`,
+    });
+
     return res.status(201).json({ deposit: { ...result, amount: result.amount.toString() }, reference });
   } catch (error) {
     return respondWithError(res, error, {
