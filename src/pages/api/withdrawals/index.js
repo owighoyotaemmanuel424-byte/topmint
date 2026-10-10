@@ -8,7 +8,7 @@ import { prisma } from '../../../lib/db/prisma';
 import { respondWithError } from '../../../lib/db-error';
 
 const schema = z.object({
-  amount: z.coerce.number().positive().max(100000000),
+  amount: z.coerce.number().positive().max(100000000).refine(value => Number(value.toFixed(2)) >= 0.01, 'Amount must be at least $0.01'),
   bankName: z.string().min(2).max(100),
   accountName: z.string().min(2).max(120),
   accountNumber: z.string().regex(/^\d{8,20}$/)
@@ -32,7 +32,7 @@ export default async function handler(req, res) {
 
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const parsed = schema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: 'Invalid withdrawal details' });
+  if (!parsed.success) return res.status(400).json({ error: 'Invalid withdrawal details. The minimum is $0.01.' });
 
   try {
     const result = await withTransaction(async tx => {
