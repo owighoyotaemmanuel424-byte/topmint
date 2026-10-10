@@ -1,95 +1,127 @@
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { requireAdmin } from '../../../lib/admin-auth';
+import { withTransaction } from '../../../lib/ledger';
 import { prisma } from '../../../lib/db/prisma';
-import { withTransaction, formatUsd } from '../../../lib/ledger';
-import { notify } from '../../../lib/notifications';
 import { respondWithError } from '../../../lib/db-error';
+import { notify } from '../../../lib/notifications';
 
-// Only operational staff may move money. Support can read the queue but not
-// resolve it, so a read-only role cannot credit a wallet.
-const REVIEWER_ROLES = ['SUPER_ADMIN', 'ADMIN'];
-const READ_ROLES = ['SUPER_ADMIN', 'ADMIN', 'SUPPORT'];
-const STATUSES = ['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'CANCELLED'];
-
-const bodySchema = z
-  .object({
-    id: z.string().min(1).max(64),
-    action: z.enum(['verify', 'reject']),
-    reason: z.string().trim().max(300).optional(),
-  })
-  .refine(value => value.action !== 'reject' || (value.reason || '').length >= 3, {
-    message: 'Give a short reason when rejecting a deposit.',
-    path: ['reason'],
-  });
-
-const serialize = row => ({
-  id: row.id,
-  transactionId: row.transactionId,
-  reference: row.transaction?.reference ?? null,
-  amount: row.amount.toString(),
-  currency: row.transaction?.currency ?? 'USD',
-  status: row.status,
-  provider: row.provider,
-  providerRef: row.providerRef,
-  createdAt: row.createdAt,
-  customer: row.user
-    ? { id: row.user.id, email: row.user.email, name: [row.user.firstName, row.user.lastName].filter(Boolean).join(' ') || null }
-    : null,
+const decisionSchema = z.object({
+  depositId: z.string().min(1),
+  action: z.enum(['approve', 'reject']),
+  note: z.string().trim().min(5).max(500),
+  verifiedReceipt: z.boolean().optional(),
+  providerRef: z.string().trim().max(160).optional(),
 });
 
-// GET  /api/admin/deposits   — the deposit review queue (defaults to pending)
-// POST /api/admin/deposits   — verify (credit the wallet) or reject a deposit
-//
-// Verification is the only operation in the platform that credits a deposit, and
-// it is guarded by the deposit's current status inside a serializable
-// transaction. A repeated verification therefore cannot credit twice, which is
-// also what protects against a duplicated provider webhook reusing this route.
+function serializeDeposit(deposit) {
+  return {
+    ...deposit,
+    amount: deposit.amount.toString(),
+    transaction: deposit.transaction
+      ? { ...deposit.transaction, amount: deposit.transaction.amount.toString() }
+      : undefined,
+  };
+}
+
 export default async function handler(req, res) {
-  if (!['GET', 'POST'].includes(req.method)) return res.status(405).json({ error: 'Method not allowed' });
+  const admin = await requireAdmin(req, res, ['SUPER_ADMIN', 'ADMIN']);
+  if (!admin) return;
 
-  try {
-    const admin = await requireAdmin(req, res, READ_ROLES);
-    if (!admin) return;
+  if (req.method === 'GET') {
+    const rawStatus = typeof req.query.status === 'string' ? req.query.status.toUpperCase() : 'PENDING';
+    const allowed = ['PENDING', 'COMPLETED', 'FAILED', 'CANCELLED', 'PROCESSING', 'ALL'];
+    if (!allowed.includes(rawStatus)) return res.status(400).json({ error: 'Invalid deposit status filter' });
 
-    if (req.method === 'GET') {
-      const status = STATUSES.includes(req.query.status) ? req.query.status : 'PENDING';
-      const rows = await prisma.deposit.findMany({
-        where: { status },
+    try {
+      const deposits = await prisma.deposit.findMany({
+        where: rawStatus === 'ALL' ? {} : { status: rawStatus },
         orderBy: { createdAt: 'asc' },
         take: 100,
         include: {
-          transaction: { select: { reference: true, currency: true, status: true } },
           user: { select: { id: true, email: true, firstName: true, lastName: true } },
+          transaction: { select: { id: true, reference: true, status: true, amount: true, currency: true, createdAt: true } },
         },
       });
-      return res.status(200).json({ deposits: rows.map(serialize), status });
+      return res.status(200).json({ deposits: deposits.map(serializeDeposit) });
+    } catch (error) {
+      return respondWithError(res, error, {
+        fallback: 'ADMIN_DEPOSITS_UNAVAILABLE',
+        message: 'Unable to load deposit requests right now.',
+      });
     }
+  }
 
-    if (!REVIEWER_ROLES.includes(admin.role)) {
-      return res.status(403).json({ error: 'Your role cannot resolve deposit requests.' });
-    }
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-    const parsed = bodySchema.safeParse(req.body);
-    if (!parsed.success) {
-      return res.status(400).json({ error: parsed.error.issues[0]?.message || 'Invalid deposit review request.' });
-    }
-    const { id, action, reason } = parsed.data;
+  const parsed = decisionSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: 'Provide a deposit, a valid decision, and a review note of at least 5 characters.' });
+  const { depositId, action, note, verifiedReceipt, providerRef } = parsed.data;
+  if (action === 'approve' && verifiedReceipt !== true) {
+    return res.status(400).json({ error: 'Confirm that payment was independently verified before approving this deposit.' });
+  }
+  if (action === 'reject' && !note.trim()) {
+    return res.status(400).json({ error: 'A reason is required to reject a deposit.' });
+  }
 
+  try {
     const result = await withTransaction(async tx => {
-      const deposit = await tx.deposit.findUnique({ where: { id } });
-      if (!deposit) return { outcome: 'NOT_FOUND' };
-      // A resolved deposit is never re-applied. This is the duplicate-credit
-      // guard for repeated admin actions and replayed webhooks alike.
-      if (deposit.status !== 'PENDING') return { outcome: 'ALREADY_RESOLVED', status: deposit.status };
+      const deposit = await tx.deposit.findUnique({
+        where: { id: depositId },
+        include: { transaction: true },
+      });
+      if (!deposit) {
+        const error = new Error('Deposit request not found');
+        error.code = 'DEPOSIT_NOT_FOUND';
+        throw error;
+      }
+      if (deposit.status !== 'PENDING' || deposit.transaction.status !== 'PENDING') {
+        const error = new Error('Deposit request has already been reviewed');
+        error.code = 'DEPOSIT_ALREADY_REVIEWED';
+        throw error;
+      }
+      if (deposit.provider !== 'MANUAL') {
+        const error = new Error('This deposit must be handled by its configured payment provider.');
+        error.code = 'DEPOSIT_PROVIDER_MISMATCH';
+        throw error;
+      }
 
-      if (action === 'verify') {
+      // Claim the pending request inside the same serializable transaction. This
+      // conditional transition prevents a second review from crediting the wallet.
+      const claimed = await tx.deposit.updateMany({
+        where: { id: deposit.id, status: 'PENDING' },
+        data: {
+          status: action === 'approve' ? 'COMPLETED' : 'FAILED',
+          providerRef: providerRef || deposit.providerRef,
+          metadata: {
+            ...(deposit.metadata && typeof deposit.metadata === 'object' && !Array.isArray(deposit.metadata) ? deposit.metadata : {}),
+            review: {
+              action,
+              note: note.trim(),
+              adminId: admin.id,
+              reviewedAt: new Date().toISOString(),
+              verifiedReceipt: action === 'approve',
+            },
+          },
+        },
+      });
+      if (claimed.count !== 1) {
+        const error = new Error('Deposit request has already been reviewed');
+        error.code = 'DEPOSIT_ALREADY_REVIEWED';
+        throw error;
+      }
+
+      if (action === 'approve') {
         const wallet = await tx.wallet.findUnique({ where: { userId: deposit.userId } });
         if (!wallet) throw new Error('Wallet not found');
+        if (wallet.currency !== deposit.transaction.currency) {
+          const error = new Error('Deposit currency does not match wallet currency');
+          error.code = 'DEPOSIT_CURRENCY_MISMATCH';
+          throw error;
+        }
 
         const amount = new Prisma.Decimal(deposit.amount);
         const balance = new Prisma.Decimal(wallet.balance).add(amount);
-
         await tx.wallet.update({ where: { id: wallet.id }, data: { balance } });
         await tx.ledgerEntry.create({
           data: {
@@ -97,70 +129,72 @@ export default async function handler(req, res) {
             transactionId: deposit.transactionId,
             amount,
             balanceAfter: balance,
-            description: 'Deposit verified',
+            description: `Verified wallet deposit ${deposit.transaction.reference}`,
           },
         });
-        await tx.transaction.update({ where: { id: deposit.transactionId }, data: { status: 'COMPLETED' } });
-        const updated = await tx.deposit.update({ where: { id: deposit.id }, data: { status: 'COMPLETED' } });
-        await tx.auditLog.create({
+        await tx.transaction.update({
+          where: { id: deposit.transactionId },
           data: {
-            adminId: admin.id,
-            action: 'deposit.verified',
-            entity: 'Transaction',
-            entityId: deposit.transactionId,
-            metadata: { depositId: deposit.id, amount: amount.toString(), balanceAfter: balance.toString() },
+            status: 'COMPLETED',
+            metadata: {
+              ...(deposit.transaction.metadata && typeof deposit.transaction.metadata === 'object' && !Array.isArray(deposit.transaction.metadata) ? deposit.transaction.metadata : {}),
+              depositReview: { action, note: note.trim(), adminId: admin.id, reviewedAt: new Date().toISOString() },
+            },
           },
         });
-        return { outcome: 'VERIFIED', deposit: updated, userId: deposit.userId, amount };
+      } else {
+        await tx.transaction.update({
+          where: { id: deposit.transactionId },
+          data: {
+            status: 'FAILED',
+            metadata: {
+              ...(deposit.transaction.metadata && typeof deposit.transaction.metadata === 'object' && !Array.isArray(deposit.transaction.metadata) ? deposit.transaction.metadata : {}),
+              depositReview: { action, note: note.trim(), adminId: admin.id, reviewedAt: new Date().toISOString() },
+            },
+          },
+        });
       }
 
-      await tx.transaction.update({ where: { id: deposit.transactionId }, data: { status: 'FAILED' } });
-      const updated = await tx.deposit.update({ where: { id: deposit.id }, data: { status: 'FAILED' } });
       await tx.auditLog.create({
         data: {
           adminId: admin.id,
-          action: 'deposit.rejected',
-          entity: 'Transaction',
-          entityId: deposit.transactionId,
-          metadata: { depositId: deposit.id, amount: deposit.amount.toString(), reason: reason || null },
+          userId: deposit.userId,
+          action: action === 'approve' ? 'DEPOSIT_APPROVED' : 'DEPOSIT_REJECTED',
+          entity: 'Deposit',
+          entityId: deposit.id,
+          metadata: {
+            amount: deposit.amount.toString(),
+            currency: deposit.transaction.currency,
+            reference: deposit.transaction.reference,
+            note: note.trim(),
+            providerRef: providerRef || deposit.providerRef || null,
+          },
+          ipAddress: typeof req.headers['x-forwarded-for'] === 'string' ? req.headers['x-forwarded-for'].split(',')[0].trim() : null,
+          userAgent: typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'] : null,
         },
       });
-      return { outcome: 'REJECTED', deposit: updated, userId: deposit.userId, amount: new Prisma.Decimal(deposit.amount) };
+
+      return { id: deposit.id, userId: deposit.userId, amount: deposit.amount.toString(), currency: deposit.transaction.currency, status: action === 'approve' ? 'COMPLETED' : 'FAILED', reference: deposit.transaction.reference };
     });
 
-    if (result.outcome === 'NOT_FOUND') return res.status(404).json({ error: 'That deposit could not be found.' });
-    if (result.outcome === 'ALREADY_RESOLVED') {
-      return res.status(409).json({
-        error: `That deposit is already ${result.status.toLowerCase()} and was not changed.`,
-        code: 'ALREADY_RESOLVED',
-      });
-    }
-
-    // The customer is told what actually happened, after the money movement
-    // committed. A notification failure cannot affect the wallet.
     await notify(prisma, {
       userId: result.userId,
-      type: 'DEPOSIT',
-      title: result.outcome === 'VERIFIED' ? 'Deposit verified' : 'Deposit could not be verified',
-      message:
-        result.outcome === 'VERIFIED'
-          ? `Your deposit of ${formatUsd(result.amount)} has been verified and credited to your wallet.`
-          : `Your deposit of ${formatUsd(result.amount)} was not credited.${reason ? ` Reason: ${reason}` : ''}`,
-      resourceType: 'Transaction',
-      resourceId: result.deposit.transactionId,
+      type: action === 'approve' ? 'DEPOSIT' : 'SECURITY',
+      title: action === 'approve' ? 'Deposit verified' : 'Deposit rejected',
+      message: action === 'approve' ? `Your deposit ${result.reference} for ${result.currency} ${result.amount} was verified and credited.` : `Your deposit ${result.reference} was rejected after review. Please check the deposit details or contact support.`,
+      resourceType: 'Deposit',
+      resourceId: result.id,
       link: '/transactions',
-      eventKey: `deposit:${result.outcome === 'VERIFIED' ? 'verified' : 'rejected'}:${result.deposit.id}`,
+      eventKey: `deposit:review:${result.id}:${result.status}`,
     });
-
-    return res.status(200).json({
-      deposit: serialize({ ...result.deposit, transaction: null, user: null }),
-      action: result.outcome,
-      delivery: 'in-app',
-    });
+    return res.status(200).json({ deposit: result, message: action === 'approve' ? 'Verified deposit approved and wallet credited.' : 'Deposit rejected; no wallet credit was made.' });
   } catch (error) {
+    if (error?.code === 'DEPOSIT_NOT_FOUND') return res.status(404).json({ error: error.message });
+    if (error?.code === 'DEPOSIT_ALREADY_REVIEWED' || error?.code === 'DEPOSIT_PROVIDER_MISMATCH' || error?.code === 'DEPOSIT_CURRENCY_MISMATCH') return res.status(409).json({ error: error.message });
+    if (error?.message === 'Wallet not found') return res.status(409).json({ error: 'The customer wallet is missing; the deposit was not approved.' });
     return respondWithError(res, error, {
       fallback: 'DEPOSIT_REVIEW_FAILED',
-      message: 'Unable to review that deposit right now. Please try again shortly.',
+      message: 'Unable to review this deposit right now. No partial wallet update was committed.',
     });
   }
 }
