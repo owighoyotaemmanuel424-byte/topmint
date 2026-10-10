@@ -6,7 +6,12 @@ import { withTransaction } from '../../../lib/ledger';
 import { prisma } from '../../../lib/db/prisma';
 import { respondWithError } from '../../../lib/db-error';
 
-const schema = z.object({ amount: z.coerce.number().positive().max(100000000) });
+const schema = z.object({
+  amount: z.coerce.number()
+    .positive()
+    .max(100000000)
+    .refine(value => Number(value.toFixed(2)) >= 0.01, 'Amount must be at least $0.01')
+});
 
 export default async function handler(req, res) {
   const user = await getAuthenticatedUser(req);
@@ -26,9 +31,7 @@ export default async function handler(req, res) {
 
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const parsed = schema.safeParse(req.body);
-  if (!parsed.success || Number(parsed.data?.amount?.toFixed(2)) < 0.01) {
-    return res.status(400).json({ error: 'Deposit amount must be at least $0.01.' });
-  }
+  if (!parsed.success) return res.status(400).json({ error: 'Invalid deposit amount. The minimum is $0.01.' });
 
   try {
     const amount = new Prisma.Decimal(parsed.data.amount.toFixed(2));
