@@ -26,7 +26,9 @@ export default async function handler(req, res) {
 
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const parsed = schema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: 'Invalid deposit amount' });
+  if (!parsed.success || Number(parsed.data?.amount?.toFixed(2)) < 0.01) {
+    return res.status(400).json({ error: 'Deposit amount must be at least $0.01.' });
+  }
 
   try {
     const amount = new Prisma.Decimal(parsed.data.amount.toFixed(2));
