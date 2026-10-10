@@ -2,18 +2,12 @@ import crypto from 'crypto';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { getAuthenticatedUser } from '../../../lib/api-auth';
-import { withTransaction, debitWallet, publicErrorMessage } from '../../../lib/ledger';
+import { withTransaction, debitWallet, publicErrorMessage, formatUsd } from '../../../lib/ledger';
+import { notify } from '../../../lib/notifications';
 import { prisma } from '../../../lib/db/prisma';
 import { respondWithError } from '../../../lib/db-error';
 
 const bodySchema = z.object({ planId: z.string().min(1), amount: z.coerce.number().positive() });
-
-const serializePlan = plan => ({
-  ...plan,
-  minimumAmount: plan.minimumAmount.toString(),
-  maximumAmount: plan.maximumAmount?.toString() ?? null,
-  returnRate: plan.returnRate.toString(),
-});
 
 export default async function handler(req, res) {
   const user = await getAuthenticatedUser(req);
@@ -28,7 +22,7 @@ export default async function handler(req, res) {
         principal: i.principal.toString(),
         expectedReturn: i.expectedReturn.toString(),
         actualReturn: i.actualReturn?.toString() ?? null,
-        plan: serializePlan(i.plan),
+        plan: { ...i.plan, minimumAmount: i.plan.minimumAmount.toString(), maximumAmount: i.plan.maximumAmount?.toString() ?? null, returnRate: i.plan.returnRate.toString() }
       })) });
     } catch (error) {
       return respondWithError(res, error, {
@@ -47,12 +41,7 @@ export default async function handler(req, res) {
       const plan = await tx.investmentPlan.findUnique({ where: { id: parsed.data.planId } });
       if (!plan || !plan.active) throw new Error('Investment plan unavailable');
       const amount = new Prisma.Decimal(parsed.data.amount.toFixed(2));
-      if (
-        amount.lessThan(plan.minimumAmount) ||
-        (plan.maximumAmount !== null && amount.greaterThan(plan.maximumAmount))
-      ) {
-        throw new Error('Amount is outside this plan range');
-      }
+      if (amount.lessThan(plan.minimumAmount) || (plan.maximumAmount !== null && amount.greaterThan(plan.maximumAmount))) throw new Error('Amount is outside this plan range');
 
       const reference = 'INV-' + crypto.randomBytes(10).toString('hex').toUpperCase();
       const transaction = await debitWallet(tx, {
@@ -71,6 +60,19 @@ export default async function handler(req, res) {
       });
       await tx.transaction.update({ where: { id: transaction.id }, data: { investmentId: investment.id } });
       return investment;
+    });
+
+    // Confirmation is only sent after the investment and its wallet debit have
+    // both committed.
+    await notify(prisma, {
+      userId: user.id,
+      type: 'INVESTMENT',
+      title: 'Investment created',
+      message: `Your investment of ${formatUsd(result.principal)} is active and matures on ${new Date(result.maturityAt).toISOString().slice(0, 10)}.`,
+      resourceType: 'Investment',
+      resourceId: result.id,
+      link: '/investments',
+      eventKey: `investment:created:${result.id}`,
     });
 
     return res.status(201).json({ investment: { ...result, principal: result.principal.toString(), expectedReturn: result.expectedReturn.toString() } });

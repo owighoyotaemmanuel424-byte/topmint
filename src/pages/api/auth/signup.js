@@ -38,8 +38,13 @@ export default async function handler(req, res) {
           wallet: { create: { currency: 'USD' } },
           notifications: {
             create: {
+              type: 'ACCOUNT',
               title: 'Welcome to TopMint',
               message: 'Your account has been created successfully.',
+              // One welcome notification per account, even if this handler is
+              // ever retried for the same user.
+              eventKey: 'account:created',
+              link: '/dashboard',
             },
           },
         },

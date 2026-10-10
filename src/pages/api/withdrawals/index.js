@@ -2,15 +2,13 @@ import crypto from 'crypto';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { getAuthenticatedUser } from '../../../lib/api-auth';
-import { withTransaction, publicErrorMessage } from '../../../lib/ledger';
+import { withTransaction, publicErrorMessage, formatUsd } from '../../../lib/ledger';
+import { notify } from '../../../lib/notifications';
 import { prisma } from '../../../lib/db/prisma';
 import { respondWithError } from '../../../lib/db-error';
 
 const schema = z.object({
-  amount: z.coerce.number()
-    .positive()
-    .max(100000000)
-    .refine(value => Number(value.toFixed(2)) >= 0.01, 'Amount must be at least $0.01'),
+  amount: z.coerce.number().positive().max(100000000).refine(value => Number(value.toFixed(2)) >= 0.01, 'Amount must be at least $0.01'),
   bankName: z.string().min(2).max(100),
   accountName: z.string().min(2).max(120),
   accountNumber: z.string().regex(/^\d{8,20}$/)
@@ -54,6 +52,20 @@ export default async function handler(req, res) {
       });
       return { withdrawal, reference };
     });
+
+    // Created after the reservation commits, so a notification failure cannot
+    // leave the wallet debited with no withdrawal record.
+    await notify(prisma, {
+      userId: user.id,
+      type: 'WITHDRAWAL',
+      title: 'Withdrawal request submitted',
+      message: `Your withdrawal request for ${formatUsd(result.withdrawal.amount)} is pending review. We will let you know as soon as it is processed.`,
+      resourceType: 'Transaction',
+      resourceId: result.withdrawal.transactionId,
+      link: '/transactions',
+      eventKey: `withdrawal:created:${result.withdrawal.id}`,
+    });
+
     return res.status(201).json({ withdrawal: { ...result.withdrawal, amount: result.withdrawal.amount.toString(), fee: result.withdrawal.fee.toString() }, reference: result.reference });
   } catch (error) {
     const message = publicErrorMessage(error, null);

@@ -4,6 +4,7 @@ import { requireAdmin } from '../../../lib/admin-auth';
 import { withTransaction } from '../../../lib/ledger';
 import { prisma } from '../../../lib/db/prisma';
 import { respondWithError } from '../../../lib/db-error';
+import { notify } from '../../../lib/notifications';
 
 const decisionSchema = z.object({
   depositId: z.string().min(1),
@@ -173,9 +174,19 @@ export default async function handler(req, res) {
         },
       });
 
-      return { id: deposit.id, status: action === 'approve' ? 'COMPLETED' : 'FAILED', reference: deposit.transaction.reference };
+      return { id: deposit.id, userId: deposit.userId, amount: deposit.amount.toString(), currency: deposit.transaction.currency, status: action === 'approve' ? 'COMPLETED' : 'FAILED', reference: deposit.transaction.reference };
     });
 
+    await notify(prisma, {
+      userId: result.userId,
+      type: action === 'approve' ? 'DEPOSIT' : 'SECURITY',
+      title: action === 'approve' ? 'Deposit verified' : 'Deposit rejected',
+      message: action === 'approve' ? `Your deposit ${result.reference} for ${result.currency} ${result.amount} was verified and credited.` : `Your deposit ${result.reference} was rejected after review. Please check the deposit details or contact support.`,
+      resourceType: 'Deposit',
+      resourceId: result.id,
+      link: '/transactions',
+      eventKey: `deposit:review:${result.id}:${result.status}`,
+    });
     return res.status(200).json({ deposit: result, message: action === 'approve' ? 'Verified deposit approved and wallet credited.' : 'Deposit rejected; no wallet credit was made.' });
   } catch (error) {
     if (error?.code === 'DEPOSIT_NOT_FOUND') return res.status(404).json({ error: error.message });

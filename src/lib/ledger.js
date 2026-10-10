@@ -16,6 +16,19 @@ export function publicErrorMessage(error, fallback) {
   return typeof message === 'string' && PUBLIC_ERRORS.has(message) ? message : fallback;
 }
 
+// USD is the platform's display currency. Notification copy uses this so every
+// amount a customer reads is formatted the same way.
+export function formatUsd(value) {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return 'USD 0.00';
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
+
 export function money(value) {
   const n = Number(value);
   if (!Number.isFinite(n) || n <= 0) throw new Error('Invalid amount');
