@@ -7,7 +7,7 @@ import { notify } from '../../../lib/notifications';
 import { prisma } from '../../../lib/db/prisma';
 import { respondWithError } from '../../../lib/db-error';
 
-const schema = z.object({ amount: z.coerce.number().positive().max(100000000) });
+const schema = z.object({ amount: z.coerce.number().positive().max(100000000).refine(value => Number(value.toFixed(2)) >= 0.01, 'Amount must be at least $0.01') });
 
 export default async function handler(req, res) {
   const user = await getAuthenticatedUser(req);
