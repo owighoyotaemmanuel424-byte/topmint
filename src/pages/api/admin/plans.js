@@ -52,6 +52,23 @@ export default async function handler(req, res) {
     if (!parsed.success) return res.status(400).json({ error: 'Invalid plan' });
     const data = { ...parsed.data };
     delete data.id;
+
+    // Validate the resulting range, not just the fields supplied in this patch.
+    // Otherwise changing only the minimum can leave it above the stored maximum.
+    const current = await prisma.investmentPlan.findUnique({
+      where: { id },
+      select: { minimumAmount: true, maximumAmount: true }
+    });
+    if (!current) return res.status(404).json({ error: 'Investment plan not found' });
+
+    const minimumAmount = data.minimumAmount ?? Number(current.minimumAmount);
+    const maximumAmount = data.maximumAmount !== undefined
+      ? data.maximumAmount
+      : current.maximumAmount == null ? null : Number(current.maximumAmount);
+    if (maximumAmount !== null && maximumAmount !== undefined && minimumAmount > maximumAmount) {
+      return res.status(400).json({ error: 'Minimum amount cannot exceed maximum amount' });
+    }
+
     if (data.minimumAmount !== undefined) data.minimumAmount = new Prisma.Decimal(Number(data.minimumAmount).toFixed(2));
     if (data.maximumAmount !== undefined) data.maximumAmount = data.maximumAmount == null ? null : new Prisma.Decimal(Number(data.maximumAmount).toFixed(2));
     if (data.returnRate !== undefined) data.returnRate = new Prisma.Decimal(Number(data.returnRate).toFixed(4));
