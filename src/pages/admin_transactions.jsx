@@ -51,10 +51,11 @@ export default function AdminTransactions() {
 
   const act = async (row, action) => {
     const reason = (reasons[row.id] || '').trim();
-    if (action === 'reject' && reason.length < 3) {
-      setError('Give a short reason before rejecting.');
+    if (action === 'reject' && reason.length < (kind === 'deposits' ? 5 : 3)) {
+      setError(kind === 'deposits' ? 'Give a reason of at least 5 characters before rejecting.' : 'Give a short reason before rejecting.');
       return;
     }
+    if (kind === 'deposits' && action === 'verify' && !window.confirm('Confirm that you independently verified the payment receipt and funds were received before crediting this wallet.')) return;
     setBusy(`${row.id}:${action}`);
     setError('');
     setNotice('');
@@ -62,7 +63,9 @@ export default function AdminTransactions() {
       const result = await requestJson(`/api/admin/${kind}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: row.id, action, reason: reason || undefined }),
+        body: JSON.stringify(kind === 'deposits'
+          ? { depositId: row.id, action: action === 'verify' ? 'approve' : action, note: reason || (action === 'verify' ? 'Payment receipt independently verified' : undefined), verifiedReceipt: action === 'verify' ? true : undefined, providerRef: row.providerRef || undefined }
+          : { id: row.id, action, reason: reason || undefined }),
       });
       if (!result.ok) throw new Error(apiErrorMessage(result, 'That action could not be completed.'));
       const label = kind === 'deposits'
