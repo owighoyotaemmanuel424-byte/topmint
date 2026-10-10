@@ -15,7 +15,11 @@ export function classifyDatabaseError(error, fallback = 'UNKNOWN') {
   if (code === 'P2002') return 'ACCOUNT_EXISTS';
   if (SCHEMA_CODES.has(code)) return 'DATABASE_SCHEMA_MISMATCH';
   if (CONNECTION_CODES.has(code)) return 'DATABASE_CONNECTION_ERROR';
-  if (/DATABASE_URL is not configured/i.test(message)) return 'DATABASE_CONFIG_ERROR';
+  // Covers a missing, malformed or quote-wrapped connection string. Prisma wraps a
+  // URL parse failure as PrismaClientKnownRequestError with code ERR_INVALID_URL
+  // and the message "Invalid URL", so match those here rather than letting it fall
+  // through to a generic failure.
+  if (code === 'ERR_INVALID_URL' || /DATABASE_URL (is|must)|Invalid URL/i.test(message)) return 'DATABASE_CONFIG_ERROR';
   if (/JWT_SECRET is not configured|ADMIN_JWT_SECRET is not configured/i.test(message)) return 'AUTH_CONFIG_ERROR';
   // The Neon driver adapter talks to the database over a WebSocket. Runtimes without
   // a global WebSocket (Node.js < 22, no `ws` installed) fail every query this way.
