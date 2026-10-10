@@ -12,6 +12,7 @@
     "lint": "next lint",
     "db:generate": "prisma generate",
     "db:validate": "prisma validate",
+    "verify:phase5": "node scripts/verify-phase5.mjs",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
