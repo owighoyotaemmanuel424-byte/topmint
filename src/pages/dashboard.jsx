@@ -2,6 +2,13 @@ import { useCallback, useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { requireCustomerAuth } from '../lib/page-auth';
+
+// Server-side guard: a request without a valid session cookie is redirected
+// before any of this page's markup is rendered.
+export async function getServerSideProps(context) {
+  return requireCustomerAuth(context);
+}
 
 const money = (value, currency = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value || 0));
 const date = value => value ? new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
@@ -59,7 +66,7 @@ export default function Dashboard() {
   return <>
     <Head><title>Overview | TopMint</title><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="theme-color" content="#071c18" /></Head>
     <main style={s.page}>
-      <aside style={s.sidebar}>
+      <aside style={s.sidebar} className="tm-side">
         <Link href="/dashboard" style={s.brand}><span style={s.brandMark}>T</span><span>topmint<small>YOUR MONEY, IN VIEW</small></span></Link>
         <p style={s.navLabel}>WORKSPACE</p>
         <Link style={{...s.navItem,...s.navActive}} href="/dashboard"><span>⌂</span> Overview</Link>
@@ -70,21 +77,21 @@ export default function Dashboard() {
         <Link style={s.navItem} href="/notifications"><span>♧</span> Notifications {unread > 0 && <b style={s.badge}>{unread}</b>}</Link>
         <div style={s.sidebarBottom}><Link style={s.navItem} href="/profile"><span>◎</span> My profile</Link><button onClick={logout} style={s.logout}>↪ Sign out</button><p style={s.secure}>● Secure customer portal</p></div>
       </aside>
-      <section style={s.main}>
-        <header style={s.topbar}><div><p style={s.kicker}>YOUR FINANCIAL SPACE</p><h1 style={s.pageTitle}>Overview</h1></div><div style={s.userBox}><div style={s.avatar}>{(user.name || user.email || 'T').charAt(0).toUpperCase()}</div><div><strong>{user.name || 'TopMint member'}</strong><small>{user.email}</small></div><button style={s.mobileSignout} onClick={logout}>Sign out</button></div></header>
+      <section style={s.main} className="tm-main">
+        <header style={s.topbar} className="tm-topbar"><div><p style={s.kicker}>YOUR FINANCIAL SPACE</p><h1 style={s.pageTitle}>Overview</h1></div><div style={s.userBox} className="tm-userbox"><div style={s.avatar}>{(user.name || user.email || 'T').charAt(0).toUpperCase()}</div><div><strong>{user.name || 'TopMint member'}</strong><small>{user.email}</small></div><button style={s.mobileSignout} className="tm-signout" onClick={logout}>Sign out</button></div></header>
         {error && <div style={s.alert}><span>{error}</span><button style={s.linkButton} onClick={load}>Retry</button></div>}
-        <section style={s.hero}>
+        <section style={s.hero} className="tm-hero">
           <div style={s.heroGlow} />
           <div style={s.heroContent}><p style={s.heroLabel}>TOTAL AVAILABLE BALANCE <span style={s.live}><i /> LIVE</span></p><h2 style={s.balance}>{money(wallet?.balance, currency)}</h2><p style={s.heroSub}>Your {currency} wallet balance</p><div style={s.heroActions}><button style={s.heroButton} onClick={() => router.push('/deposit')}>＋ Add funds</button><button style={s.heroOutline} onClick={() => router.push('/withdraw')}>Withdraw ↗</button></div></div>
-          <div style={s.heroSymbol}>$</div>
+          <div style={s.heroSymbol} className="tm-hero-symbol">$</div>
           <div style={s.heroFooter}><span>WALLET STATUS</span><strong><i /> Active</strong><span style={{marginLeft:'auto'}}>MEMBER SINCE {date(user.createdAt)}</span></div>
         </section>
-        <div style={s.statsGrid}>
+        <div style={s.statsGrid} className="tm-stats">
           <article style={s.statCard}><div style={s.statTop}><span style={s.statIcon}>↗</span><span style={s.statHint}>Portfolio</span></div><p style={s.statLabel}>Active investments</p><h3>{activeInvestments.length}</h3><p style={s.statFoot}>{money(invested, currency)} principal invested</p></article>
           <article style={s.statCard}><div style={s.statTop}><span style={{...s.statIcon,background:'#f1edff',color:'#7557c7'}}>◷</span><span style={s.statHint}>In progress</span></div><p style={s.statLabel}>Pending transactions</p><h3>{transactions.filter(t => ['PENDING','PROCESSING'].includes(t.status)).length}</h3><p style={s.statFoot}>Awaiting completion</p></article>
           <article style={s.statCard}><div style={s.statTop}><span style={{...s.statIcon,background:'#fff3e7',color:'#a65c16'}}>▤</span><span style={s.statHint}>Explore</span></div><p style={s.statLabel}>Available plans</p><h3>{plans.length}</h3><p style={s.statFoot}>Options available to you</p></article>
         </div>
-        <div style={s.contentGrid}>
+        <div style={s.contentGrid} className="tm-content">
           <section style={s.panel}><div style={s.sectionHead}><div><p style={s.kicker}>ACCOUNT ACTIVITY</p><h2 style={s.sectionTitle}>Recent transactions</h2></div><button style={s.textLink} onClick={() => router.push('/transactions')}>View all ↗</button></div>
             {transactions.length ? <div style={s.table}>{transactions.slice(0,6).map(t => <div key={t.id} style={s.transaction}><div style={s.txIcon}>{t.type === 'DEPOSIT' ? '↓' : t.type === 'WITHDRAWAL' ? '↑' : t.type === 'INVESTMENT' ? '◈' : '↔'}</div><div style={s.txInfo}><strong>{title(t.description || t.type)}</strong><small>{date(t.createdAt)} · {t.reference}</small></div><div style={s.txAmount}><strong>{money(t.amount, t.currency || currency)}</strong><small style={{color:t.status === 'COMPLETED' ? '#16805d' : t.status === 'FAILED' ? '#b42318' : '#9a6700'}}>{title(t.status)}</small></div></div>)}</div> : <div style={s.empty}><span>↔</span><strong>No transactions yet</strong><p>Your deposits, withdrawals and investments will appear here.</p><button style={s.primary} onClick={() => router.push('/deposit')}>Make your first deposit</button></div>}
           </section>
@@ -98,7 +105,7 @@ export default function Dashboard() {
         </section>
         <footer style={s.footer}><span>© {new Date().getFullYear()} TopMint</span><span>USD is the platform&apos;s primary currency for new wallets. Historical balances retain their recorded currency.</span></footer>
       </section>
-      <nav style={s.mobileNav}><Link href="/dashboard">⌂<small>Home</small></Link><Link href="/deposit">＋<small>Fund</small></Link><Link href="/investments">◫<small>Invest</small></Link><Link href="/transactions">↔<small>Activity</small></Link><Link href="/profile">◎<small>Profile</small></Link></nav>
+      <nav style={s.mobileNav} className="tm-mobile-nav"><Link href="/dashboard">⌂<small>Home</small></Link><Link href="/deposit">＋<small>Fund</small></Link><Link href="/investments">◫<small>Invest</small></Link><Link href="/transactions">↔<small>Activity</small></Link><Link href="/profile">◎<small>Profile</small></Link></nav>
     </main>
   </>;
 }
@@ -122,8 +129,7 @@ const s = {
  pageTitle:{fontSize:29,letterSpacing:'-1px',margin:0,fontWeight:800},
  userBox:{display:'flex',alignItems:'center',gap:11},
  avatar:{width:42,height:42,borderRadius:15,background:'#dcebdc',color:'#24543f',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800},
- 'userBox strong':{display:'block',fontSize:12}, 'userBox small':{display:'block',fontSize:11,color:'#74847d',marginTop:3},
- mobileSignout:{display:'none'},
+ 'userBox strong':{display:'block',fontSize:12}, 'userBox small':{display:'block',fontSize:11,color:'#74847d',marginTop:3},  mobileSignout:{display:'none',border:'1px solid #d1d5db',borderRadius:10,padding:'9px 13px',background:'#fff',fontWeight:700,cursor:'pointer'},
  hero:{position:'relative',overflow:'hidden',borderRadius:22,background:'linear-gradient(115deg,#0d3026 0%,#15513c 60%,#216d4d 100%)',color:'#fff',padding:'30px 32px 0',marginBottom:18,boxShadow:'0 16px 38px rgba(13,48,38,.13)'},
  heroGlow:{position:'absolute',width:280,height:280,borderRadius:'50%',background:'rgba(184,243,107,.10)',right:60,top:-160},
  heroContent:{position:'relative',zIndex:1},

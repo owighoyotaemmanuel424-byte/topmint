@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { prisma } from '../../../lib/db/prisma';
-import { createAuthToken } from '../../../lib/auth';
+import { createAuthToken, customerSessionCookie } from '../../../lib/auth';
 import { classifyDatabaseError } from '../../../lib/db-error';
 
 const schema = z.object({
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
 
     await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
     const token = await createAuthToken(user.id);
-    res.setHeader('Set-Cookie', `token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800`);
+    res.setHeader('Set-Cookie', customerSessionCookie(req, token));
     return res.status(200).json({ user: { id: user.id, email: user.email, name: [user.firstName, user.lastName].filter(Boolean).join(' ') } });
   } catch (error) {
     const code = classifyDatabaseError(error, 'SIGNIN_FAILED');

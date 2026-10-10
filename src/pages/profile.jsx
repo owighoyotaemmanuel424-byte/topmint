@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import { requireCustomerAuth } from '../lib/page-auth';
+
+// Server-side guard: a request without a valid session cookie is redirected
+// before any of this page's markup is rendered.
+export async function getServerSideProps(context) {
+  return requireCustomerAuth(context);
+}
 
 export default function Profile() {
   const [user, setUser] = useState(null);
