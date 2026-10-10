@@ -2,6 +2,9 @@
   "name": "topmint",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
@@ -26,6 +29,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "swr": "^2.1.1",
+    "ws": "^8.22.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {

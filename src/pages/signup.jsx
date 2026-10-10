@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { requestJson, apiErrorMessage } from '../lib/api-client';
+import { requestJson, apiErrorMessage, withConfigHint } from '../lib/api-client';
 
 const Signup = () => {
   const [passwordShow, setPasswordShow] = useState(false);
@@ -32,7 +32,8 @@ const Signup = () => {
           ACCOUNT_EXISTS: 'An account already exists with this email.',
           VALIDATION_ERROR: 'Please enter a valid name, email and password of at least 8 characters.',
         };
-        throw new Error(messages[data.code] || apiErrorMessage(result, 'Unable to create your account.'));
+        const mapped = messages[data.code];
+        throw new Error(mapped ? withConfigHint(mapped, data) : apiErrorMessage(result, 'Unable to create your account.'));
       }
       sessionStorage.setItem('activeUser', JSON.stringify(data.user));
       // Registration signs the customer in with an HTTP-only cookie, so the next

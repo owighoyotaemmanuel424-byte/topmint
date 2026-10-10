@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { prisma } from '../../../lib/db/prisma';
 import { createAuthToken, customerSessionCookie } from '../../../lib/auth';
-import { classifyDatabaseError } from '../../../lib/db-error';
+import { classifyDatabaseError, errorBody } from '../../../lib/db-error';
 
 const schema = z.object({
   email: z.string().trim().email().max(254),
@@ -66,9 +66,8 @@ export default async function handler(req, res) {
     });
 
     const status = code === 'ACCOUNT_EXISTS' ? 409 : 500;
-    return res.status(status).json({
-      error: 'Unable to create your account right now.',
-      code,
-    });
+    // A configuration failure carries an actionable hint so the deployment can be
+    // fixed from the sign-up screen instead of the platform's log viewer.
+    return res.status(status).json(errorBody(error, { fallback: 'SIGNUP_FAILED', message: 'Unable to create your account right now.' }));
   }
 }

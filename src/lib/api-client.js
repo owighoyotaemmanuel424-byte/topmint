@@ -30,13 +30,24 @@ export async function requestJson(url, options) {
   return { ok: response.ok, status: response.status, data, invalidBody, networkError: false };
 }
 
+// A configuration failure (a missing environment variable, for example) carries a
+// short actionable `hint` alongside its error code. Appending it means a deployment
+// can be fixed from the screen that reported the problem instead of the hosting
+// dashboard's log viewer.
+export function withConfigHint(message, data) {
+  const hint = data && typeof data.hint === 'string' ? data.hint : '';
+  return hint ? `${message} (${hint})` : message;
+}
+
 // Human-readable text for a failed requestJson result. Uses the API's own message
 // when there is one and stays honest when the server answered with something the
 // page cannot interpret.
 export function apiErrorMessage(result, fallback = 'Something went wrong. Please try again.') {
   if (result?.networkError) return 'We could not reach TopMint. Check your connection and try again.';
   const data = result?.data;
-  if (data && typeof data === 'object' && typeof data.error === 'string' && data.error) return data.error;
+  if (data && typeof data === 'object' && typeof data.error === 'string' && data.error) {
+    return withConfigHint(data.error, data);
+  }
   if (result?.invalidBody) {
     return `The server could not complete that request (error ${result?.status || 'unknown'}). Please try again shortly.`;
   }

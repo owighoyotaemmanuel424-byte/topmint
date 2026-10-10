@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { prisma } from '../../../lib/db/prisma';
 import { createAuthToken, customerSessionCookie } from '../../../lib/auth';
-import { classifyDatabaseError } from '../../../lib/db-error';
+import { classifyDatabaseError, errorBody } from '../../../lib/db-error';
 
 const schema = z.object({
   email: z.string().trim().email().max(254),
@@ -29,6 +29,8 @@ export default async function handler(req, res) {
   } catch (error) {
     const code = classifyDatabaseError(error, 'SIGNIN_FAILED');
     console.error('signin error', { code, name: error?.name, prismaCode: error?.code, message: error?.message });
-    return res.status(500).json({ error: 'Unable to sign in right now.', code });
+    // A configuration failure carries an actionable hint so the deployment can be
+    // fixed from the sign-in screen instead of the platform's log viewer.
+    return res.status(500).json(errorBody(error, { fallback: 'SIGNIN_FAILED', message: 'Unable to sign in right now.' }));
   }
 }

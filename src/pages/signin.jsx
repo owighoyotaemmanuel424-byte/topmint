@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { requestJson, apiErrorMessage } from '../lib/api-client';
+import { requestJson, apiErrorMessage, withConfigHint } from '../lib/api-client';
 
 const Signin = () => {
   const [passwordShow, setPasswordShow] = useState(false);
@@ -30,7 +30,8 @@ const Signin = () => {
           DATABASE_CONNECTION_ERROR: 'The account database is temporarily unavailable. Please try again shortly.',
           AUTH_CONFIG_ERROR: 'Account authentication is not configured correctly. Please contact support.',
         };
-        throw new Error(messages[data.code] || apiErrorMessage(result, 'Unable to sign in.'));
+        const mapped = messages[data.code];
+        throw new Error(mapped ? withConfigHint(mapped, data) : apiErrorMessage(result, 'Unable to sign in.'));
       }
       sessionStorage.setItem('activeUser', JSON.stringify(data.user));
       // Always land on the customer dashboard. registerFromPath defaulted to "/",
