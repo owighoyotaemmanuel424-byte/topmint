@@ -36,7 +36,7 @@ export default function AdminUsers() {
         {users.map(user => <div key={user.id} style={s.row}>
           <div><strong>{[user.firstName, user.lastName].filter(Boolean).join(' ') || 'Unnamed'}</strong><small>{user.email}</small></div>
           <span>{user.status}</span>
-          <span>{user.wallet?.currency || 'NGN'} {Number(user.wallet?.balance || 0).toLocaleString()}</span>
+          <span>{user.wallet?.currency || 'USD'} {Number(user.wallet?.balance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           <span>{user._count?.investments || 0}</span>
         </div>)}
         {!users.length && <p>No customers found.</p>}
