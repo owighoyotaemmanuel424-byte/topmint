@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import { requestJson, apiErrorMessage } from '../lib/api-client';
 
 const Signin = () => {
   const [passwordShow, setPasswordShow] = useState(false);
@@ -15,13 +16,13 @@ const Signin = () => {
     setErrMsg('');
     setLoading(true);
     try {
-      const response = await fetch('/api/auth/signin', {
+      const result = await requestJson('/api/auth/signin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      const data = await response.json();
-      if (!response.ok) {
+      const data = result.data || {};
+      if (!result.ok) {
         const messages = {
           DATABASE_CONFIG_ERROR: 'Account service is not connected to the database yet. Please try again shortly.',
           DATABASE_RUNTIME_ERROR: 'Account service is starting up. Please try again in a moment.',
@@ -29,7 +30,7 @@ const Signin = () => {
           DATABASE_CONNECTION_ERROR: 'The account database is temporarily unavailable. Please try again shortly.',
           AUTH_CONFIG_ERROR: 'Account authentication is not configured correctly. Please contact support.',
         };
-        throw new Error(messages[data.code] || data.error || 'Unable to sign in.');
+        throw new Error(messages[data.code] || apiErrorMessage(result, 'Unable to sign in.'));
       }
       sessionStorage.setItem('activeUser', JSON.stringify(data.user));
       // Always land on the customer dashboard. registerFromPath defaulted to "/",

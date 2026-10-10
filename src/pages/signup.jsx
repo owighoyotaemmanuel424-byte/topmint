@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import { requestJson, apiErrorMessage } from '../lib/api-client';
 
 const Signup = () => {
   const [passwordShow, setPasswordShow] = useState(false);
@@ -15,13 +16,13 @@ const Signup = () => {
     setErrMsg('');
     setLoading(true);
     try {
-      const response = await fetch('/api/auth/signup', {
+      const result = await requestJson('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      const data = await response.json();
-      if (!response.ok) {
+      const data = result.data || {};
+      if (!result.ok) {
         const messages = {
           DATABASE_CONFIG_ERROR: 'Account service is not connected to the database yet. Please try again shortly.',
           DATABASE_RUNTIME_ERROR: 'Account service is starting up. Please try again in a moment.',
@@ -31,7 +32,7 @@ const Signup = () => {
           ACCOUNT_EXISTS: 'An account already exists with this email.',
           VALIDATION_ERROR: 'Please enter a valid name, email and password of at least 8 characters.',
         };
-        throw new Error(messages[data.code] || data.error || 'Unable to create your account.');
+        throw new Error(messages[data.code] || apiErrorMessage(result, 'Unable to create your account.'));
       }
       sessionStorage.setItem('activeUser', JSON.stringify(data.user));
       // Registration signs the customer in with an HTTP-only cookie, so the next

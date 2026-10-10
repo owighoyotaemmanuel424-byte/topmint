@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { getAuthenticatedUser } from '../../../lib/api-auth';
 import { withTransaction, publicErrorMessage } from '../../../lib/ledger';
 import { prisma } from '../../../lib/db/prisma';
+import { respondWithError } from '../../../lib/db-error';
 
 const schema = z.object({
   amount: z.coerce.number().positive().max(100000000),
@@ -15,10 +16,19 @@ const schema = z.object({
 export default async function handler(req, res) {
   const user = await getAuthenticatedUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
   if (req.method === 'GET') {
-    const rows = await prisma.withdrawal.findMany({ where: { userId: user.id }, orderBy: { createdAt: 'desc' }, take: 50 });
-    return res.status(200).json({ withdrawals: rows.map(w => ({ ...w, amount: w.amount.toString(), fee: w.fee.toString() })) });
+    try {
+      const rows = await prisma.withdrawal.findMany({ where: { userId: user.id }, orderBy: { createdAt: 'desc' }, take: 50 });
+      return res.status(200).json({ withdrawals: rows.map(w => ({ ...w, amount: w.amount.toString(), fee: w.fee.toString() })) });
+    } catch (error) {
+      return respondWithError(res, error, {
+        fallback: 'WITHDRAWALS_UNAVAILABLE',
+        message: 'Unable to load your withdrawals right now. Please try again shortly.',
+      });
+    }
   }
+
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: 'Invalid withdrawal details' });
@@ -43,6 +53,11 @@ export default async function handler(req, res) {
     });
     return res.status(201).json({ withdrawal: { ...result.withdrawal, amount: result.withdrawal.amount.toString(), fee: result.withdrawal.fee.toString() }, reference: result.reference });
   } catch (error) {
-    return res.status(400).json({ error: publicErrorMessage(error, 'Withdrawal failed') });
+    const message = publicErrorMessage(error, null);
+    if (message) return res.status(400).json({ error: message });
+    return respondWithError(res, error, {
+      fallback: 'WITHDRAWAL_FAILED',
+      message: 'Unable to submit your withdrawal request right now. Please try again shortly.',
+    });
   }
 }

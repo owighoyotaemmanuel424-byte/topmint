@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import { requestJson, apiErrorMessage } from '../lib/api-client';
 
 export default function AdminUsers() {
   const router = useRouter();
@@ -11,10 +12,9 @@ export default function AdminUsers() {
   const load = async () => {
     setError('');
     try {
-      const r = await fetch('/api/admin/users');
-      const d = await r.json();
-      if (!r.ok) throw new Error(d.error || 'Unable to load users');
-      setUsers(d.users || []);
+      const r = await requestJson('/api/admin/users');
+      if (!r.ok) throw new Error(apiErrorMessage(r, 'Unable to load users'));
+      setUsers(r.data?.users || []);
     } catch (e) {
       if (/unauthorized|forbidden/i.test(e.message)) router.replace('/signin_admin');
       else setError(e.message);

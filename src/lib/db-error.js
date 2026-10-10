@@ -26,3 +26,17 @@ export function classifyDatabaseError(error, fallback = 'UNKNOWN') {
 
   return fallback;
 }
+
+// One place for API routes to turn an unexpected failure into a JSON response.
+// An error that escapes the handler produces a plain-text/HTML error page from the
+// hosting layer, which client code cannot parse (see src/lib/api-client.js), so
+// every route that touches the database answers through here instead.
+export function respondWithError(res, error, {
+  fallback = 'SERVER_ERROR',
+  status = 503,
+  message = 'This service is temporarily unavailable. Please try again shortly.',
+} = {}) {
+  const code = classifyDatabaseError(error, fallback);
+  console.error('api error', { code, name: error?.name, prismaCode: error?.code, message: error?.message });
+  return res.status(status).json({ error: message, code });
+}

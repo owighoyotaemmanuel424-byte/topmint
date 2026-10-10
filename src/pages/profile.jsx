@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { requireCustomerAuth } from '../lib/page-auth';
+import { requestJson } from '../lib/api-client';
 
 // Server-side guard: a request without a valid session cookie is redirected
 // before any of this page's markup is rendered.
@@ -15,11 +16,10 @@ export default function Profile() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch('/api/auth/me')
-      .then(async (r) => {
-        const d = await r.json();
-        if (!r.ok) throw new Error(d.error || 'Session expired');
-        setUser(d.user);
+    requestJson('/api/auth/me')
+      .then((result) => {
+        if (!result.ok) throw new Error('Session expired');
+        setUser(result.data.user);
       })
       .catch(() => router.replace('/signin'))
       .finally(() => setLoading(false));

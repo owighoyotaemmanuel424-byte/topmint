@@ -3,12 +3,25 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { requireCustomerAuth } from '../lib/page-auth';
+import { requestJson, apiErrorMessage } from '../lib/api-client';
 
 // Server-side guard: a request without a valid session cookie is redirected
 // before any of this page's markup is rendered.
 export async function getServerSideProps(context) {
   return requireCustomerAuth(context);
 }
+
+// Every dashboard section is loaded in parallel. Keeping the endpoint and a label
+// together lets a single failed call name the section it belongs to instead of
+// surfacing a raw parse error.
+const SECTIONS = [
+  { url: '/api/auth/me', label: 'your account' },
+  { url: '/api/wallet', label: 'your wallet' },
+  { url: '/api/transactions?limit=8', label: 'your transactions' },
+  { url: '/api/investments', label: 'your investments' },
+  { url: '/api/investments/plans', label: 'available plans' },
+  { url: '/api/notifications', label: 'your notifications' },
+];
 
 const money = (value, currency = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value || 0));
 const date = value => value ? new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
@@ -24,21 +37,30 @@ export default function Dashboard() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [attempt, setAttempt] = useState(0);
 
   const load = useCallback(async () => {
     setError('');
+    // Retries go back through the loading state so the button never looks inert.
+    setLoading(true);
     try {
-      const endpoints = ['/api/auth/me', '/api/wallet', '/api/transactions?limit=8', '/api/investments', '/api/investments/plans', '/api/notifications'];
-      const responses = await Promise.all(endpoints.map(url => fetch(url)));
-      const results = await Promise.all(responses.map(async r => ({ ok: r.ok, data: await r.json() })));
-      if (!results[0].ok) { router.replace('/signin'); return; }
-      if (!results.every(x => x.ok)) throw new Error('Some dashboard information could not be loaded. Please retry.');
-      setUser(results[0].data.user);
-      setWallet(results[1].data.wallet);
-      setTransactions(results[2].data.transactions || []);
-      setInvestments(results[3].data.investments || []);
-      setPlans(results[4].data.plans || []);
-      setNotifications(results[5].data.notifications || []);
+      const results = await Promise.all(SECTIONS.map(section => requestJson(section.url)));
+      // A rejected session means there is no account to load, so send the customer
+      // back to sign-in. Any other failure is reported instead of bouncing them to
+      // a sign-in page that would accept credentials it cannot use.
+      if ([401, 403].includes(results[0].status)) { router.replace('/signin'); return; }
+      const failedIndex = results.findIndex(result => !result.ok);
+      if (failedIndex >= 0) {
+        const failed = results[failedIndex];
+        throw new Error(`We couldn't load ${SECTIONS[failedIndex].label}: ${apiErrorMessage(failed, 'the request failed.')}`);
+      }
+      const [me, walletResult, transactionResult, investmentResult, planResult, notificationResult] = results.map(result => result.data || {});
+      setUser(me.user);
+      setWallet(walletResult.wallet);
+      setTransactions(transactionResult.transactions || []);
+      setInvestments(investmentResult.investments || []);
+      setPlans(planResult.plans || []);
+      setNotifications(notificationResult.notifications || []);
     } catch (e) { setError(e.message || 'Unable to load your dashboard.'); }
     finally { setLoading(false); }
   }, [router]);
@@ -55,8 +77,8 @@ export default function Dashboard() {
     if (response.ok) setNotifications(items => items.map(item => item.id === id ? { ...item, read: true } : item));
   };
 
-  if (loading) return <main style={s.page}><div style={s.loading}><span style={s.brandMark}>T</span><p>Loading your TopMint account…</p></div></main>;
-  if (!user) return <main style={s.page}><div style={s.panel}><h2>We couldn&apos;t load your account</h2><p style={s.muted}>{error || 'Your session may have expired.'}</p><button style={s.primary} onClick={load}>Try again</button></div></main>;
+  if (loading) return <main style={s.fallbackPage}><div style={s.fallbackPanel}><div style={s.loading}><span style={s.brandMark}>T</span><p>Loading your TopMint account…</p></div></div></main>;
+  if (!user) return <main style={s.fallbackPage}><div style={s.fallbackPanel}><h2 style={s.fallbackTitle}>We couldn&apos;t load your account</h2><p style={s.muted}>{error || 'Your session may have expired.'}</p><button style={s.primary} onClick={() => { setAttempt(value => value + 1); load(); }}>Try again</button><small style={s.attempt}>Attempt {attempt + 1}</small></div></main>;
 
   const currency = wallet?.currency || 'USD';
   const unread = notifications.filter(n => !n.read).length;
@@ -187,7 +209,12 @@ const s = {
  alert:{display:'flex',justifyContent:'space-between',gap:10,alignItems:'center',background:'#fff4df',color:'#855d16',padding:13,borderRadius:12,marginBottom:16,fontSize:12},
  linkButton:{border:0,background:'transparent',textDecoration:'underline',color:'inherit',cursor:'pointer'},
  footer:{display:'flex',justifyContent:'space-between',gap:15,flexWrap:'wrap',fontSize:9,color:'#8b9891',padding:'4px 2px 12px'},
- loading:{margin:'auto',textAlign:'center',color:'#61756b'},
+ loading:{textAlign:'center',color:'#61756b'},
+ fallbackPage:{minHeight:'100vh',background:'#f5f7f6',color:'#14211d',fontFamily:'Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',display:'flex',alignItems:'center',justifyContent:'center',padding:'24px',boxSizing:'border-box'},
+ fallbackPanel:{width:'100%',maxWidth:420,boxSizing:'border-box',background:'#fff',border:'1px solid #e8eeea',borderRadius:17,padding:'26px 24px',boxShadow:'0 16px 40px rgba(13,48,38,.07)'},
+ fallbackTitle:{margin:'0 0 10px',fontSize:20,letterSpacing:'-.5px'},
+ attempt:{display:'block',marginTop:12,fontSize:10,color:'#9aa59f'},
+
  mobileNav:{display:'none'},
  'panel h2':{marginTop:0}
 };
