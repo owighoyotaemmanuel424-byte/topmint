@@ -17,10 +17,12 @@ export async function getServerSideProps(context) {
 const SECTIONS = [
   { url: '/api/auth/me', label: 'your account' },
   { url: '/api/wallet', label: 'your wallet' },
-  { url: '/api/transactions?limit=8', label: 'your transactions' },
+  { url: '/api/transactions?limit=6', label: 'your transactions' },
   { url: '/api/investments', label: 'your investments' },
   { url: '/api/investments/plans', label: 'available plans' },
-  { url: '/api/notifications', label: 'your notifications' },
+  // Only the three most recent notifications are needed here; the unread total
+  // comes back from the same response and is counted in the database.
+  { url: '/api/notifications?pageSize=3', label: 'your notifications' },
 ];
 
 const money = (value, currency = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value || 0));
@@ -35,6 +37,7 @@ export default function Dashboard() {
   const [investments, setInvestments] = useState([]);
   const [plans, setPlans] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [attempt, setAttempt] = useState(0);
@@ -61,6 +64,7 @@ export default function Dashboard() {
       setInvestments(investmentResult.investments || []);
       setPlans(planResult.plans || []);
       setNotifications(notificationResult.notifications || []);
+      setUnreadCount(notificationResult.unread || 0);
     } catch (e) { setError(e.message || 'Unable to load your dashboard.'); }
     finally { setLoading(false); }
   }, [router]);
@@ -73,15 +77,18 @@ export default function Dashboard() {
     router.replace('/signin');
   };
   const markRead = async id => {
-    const response = await fetch('/api/notifications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
-    if (response.ok) setNotifications(items => items.map(item => item.id === id ? { ...item, read: true } : item));
+    const result = await requestJson(`/api/notifications/${encodeURIComponent(id)}`, { method: 'PATCH' });
+    if (!result.ok) return;
+    setNotifications(items => items.map(item => (item.id === id ? { ...item, read: true } : item)));
+    // The API returns the authoritative unread total for the whole account.
+    if (typeof result.data?.unread === 'number') setUnreadCount(result.data.unread);
   };
 
   if (loading) return <main style={s.fallbackPage}><div style={s.fallbackPanel}><div style={s.loading}><span style={s.brandMark}>T</span><p>Loading your TopMint account…</p></div></div></main>;
   if (!user) return <main style={s.fallbackPage}><div style={s.fallbackPanel}><h2 style={s.fallbackTitle}>We couldn&apos;t load your account</h2><p style={s.muted}>{error || 'Your session may have expired.'}</p><button style={s.primary} onClick={() => { setAttempt(value => value + 1); load(); }}>Try again</button><small style={s.attempt}>Attempt {attempt + 1}</small></div></main>;
 
   const currency = wallet?.currency || 'USD';
-  const unread = notifications.filter(n => !n.read).length;
+  const unread = unreadCount;
   const activeInvestments = investments.filter(i => i.status === 'ACTIVE');
   const invested = activeInvestments.reduce((sum, i) => sum + Number(i.principal || 0), 0);
 

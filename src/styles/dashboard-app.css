@@ -93,3 +93,144 @@
     white-space: nowrap;
   }
 }
+
+/* Transaction history and notification centre.
+
+   Same approach as the dashboard: inline styles for the visual design, classes
+   here for the layout that depends on viewport width. */
+
+.tm-portal-shell {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.tm-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.tm-tx-head,
+.tm-tx-row {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr 1.5fr 1fr 1fr 0.95fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.tm-tx-head {
+  font-size: 10px;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: #8a9992;
+  padding: 6px 8px 10px;
+  border-bottom: 1px solid #e8eeea;
+}
+
+.tm-tx-row {
+  width: 100%;
+  padding: 14px 8px;
+  border: 0;
+  border-bottom: 1px solid #f0f3f1;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+.tm-tx-row:hover,
+.tm-tx-row:focus-visible {
+  background: #f6faf7;
+}
+
+.tm-tx-cell::before {
+  display: none;
+}
+
+.tm-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 16px;
+}
+
+.tm-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(7, 28, 24, 0.55);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 28px 16px;
+  overflow-y: auto;
+}
+
+.tm-modal {
+  width: 100%;
+  max-width: 640px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 22px;
+  box-sizing: border-box;
+  box-shadow: 0 24px 60px rgba(7, 28, 24, 0.3);
+}
+
+.tm-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0 20px;
+}
+
+@media (max-width: 900px) {
+  .tm-tx-head {
+    display: none !important;
+  }
+
+  .tm-tx-row {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+    padding: 14px 10px !important;
+    border: 1px solid #edf2ee !important;
+    margin-bottom: 8px;
+  }
+
+  /* Each column labels itself once the header row is gone. */
+  .tm-tx-cell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .tm-tx-cell::before {
+    display: inline-block;
+    content: attr(data-label);
+    font-size: 10px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #8a9992;
+    flex-shrink: 0;
+  }
+
+  .tm-portal-nav {
+    width: 100% !important;
+    margin-left: 0 !important;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .tm-portal-shell {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .tm-modal {
+    padding: 18px 16px;
+  }
+}

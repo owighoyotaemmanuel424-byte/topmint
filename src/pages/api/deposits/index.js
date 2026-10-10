@@ -2,7 +2,8 @@ import crypto from 'crypto';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { getAuthenticatedUser } from '../../../lib/api-auth';
-import { withTransaction } from '../../../lib/ledger';
+import { withTransaction, formatUsd } from '../../../lib/ledger';
+import { notify } from '../../../lib/notifications';
 import { prisma } from '../../../lib/db/prisma';
 import { respondWithError } from '../../../lib/db-error';
 
@@ -37,6 +38,21 @@ export default async function handler(req, res) {
       });
       return tx.deposit.create({ data: { userId: user.id, transactionId: transaction.id, provider: 'MANUAL', amount, status: 'PENDING' } });
     });
+
+    // Written after the financial transaction commits: a notification failure can
+    // never undo the deposit record, and the event key makes a retried request
+    // idempotent instead of producing a second notification.
+    await notify(prisma, {
+      userId: user.id,
+      type: 'DEPOSIT',
+      title: 'Deposit request received',
+      message: `We received your deposit request for ${formatUsd(result.amount)}. Your wallet is credited once the payment is verified.`,
+      resourceType: 'Transaction',
+      resourceId: result.transactionId,
+      link: '/transactions',
+      eventKey: `deposit:created:${result.id}`,
+    });
+
     return res.status(201).json({ deposit: { ...result, amount: result.amount.toString() }, reference });
   } catch (error) {
     return respondWithError(res, error, {

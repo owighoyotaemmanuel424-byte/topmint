@@ -2,7 +2,8 @@ import crypto from 'crypto';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { getAuthenticatedUser } from '../../../lib/api-auth';
-import { withTransaction, debitWallet, publicErrorMessage } from '../../../lib/ledger';
+import { withTransaction, debitWallet, publicErrorMessage, formatUsd } from '../../../lib/ledger';
+import { notify } from '../../../lib/notifications';
 import { prisma } from '../../../lib/db/prisma';
 import { respondWithError } from '../../../lib/db-error';
 
@@ -59,6 +60,19 @@ export default async function handler(req, res) {
       });
       await tx.transaction.update({ where: { id: transaction.id }, data: { investmentId: investment.id } });
       return investment;
+    });
+
+    // Confirmation is only sent after the investment and its wallet debit have
+    // both committed.
+    await notify(prisma, {
+      userId: user.id,
+      type: 'INVESTMENT',
+      title: 'Investment created',
+      message: `Your investment of ${formatUsd(result.principal)} is active and matures on ${new Date(result.maturityAt).toISOString().slice(0, 10)}.`,
+      resourceType: 'Investment',
+      resourceId: result.id,
+      link: '/investments',
+      eventKey: `investment:created:${result.id}`,
     });
 
     return res.status(201).json({ investment: { ...result, principal: result.principal.toString(), expectedReturn: result.expectedReturn.toString() } });
