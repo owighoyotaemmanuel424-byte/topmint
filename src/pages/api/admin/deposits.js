@@ -79,6 +79,11 @@ export default async function handler(req, res) {
         error.code = 'DEPOSIT_ALREADY_REVIEWED';
         throw error;
       }
+      if (deposit.provider !== 'MANUAL') {
+        const error = new Error('This deposit must be handled by its configured payment provider.');
+        error.code = 'DEPOSIT_PROVIDER_MISMATCH';
+        throw error;
+      }
 
       // Claim the pending request inside the same serializable transaction. This
       // conditional transition prevents a second review from crediting the wallet.
@@ -108,6 +113,11 @@ export default async function handler(req, res) {
       if (action === 'approve') {
         const wallet = await tx.wallet.findUnique({ where: { userId: deposit.userId } });
         if (!wallet) throw new Error('Wallet not found');
+        if (wallet.currency !== deposit.transaction.currency) {
+          const error = new Error('Deposit currency does not match wallet currency');
+          error.code = 'DEPOSIT_CURRENCY_MISMATCH';
+          throw error;
+        }
 
         const amount = new Prisma.Decimal(deposit.amount);
         const balance = new Prisma.Decimal(wallet.balance).add(amount);
@@ -169,7 +179,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ deposit: result, message: action === 'approve' ? 'Verified deposit approved and wallet credited.' : 'Deposit rejected; no wallet credit was made.' });
   } catch (error) {
     if (error?.code === 'DEPOSIT_NOT_FOUND') return res.status(404).json({ error: error.message });
-    if (error?.code === 'DEPOSIT_ALREADY_REVIEWED') return res.status(409).json({ error: error.message });
+    if (error?.code === 'DEPOSIT_ALREADY_REVIEWED' || error?.code === 'DEPOSIT_PROVIDER_MISMATCH' || error?.code === 'DEPOSIT_CURRENCY_MISMATCH') return res.status(409).json({ error: error.message });
     if (error?.message === 'Wallet not found') return res.status(409).json({ error: 'The customer wallet is missing; the deposit was not approved.' });
     return respondWithError(res, error, {
       fallback: 'DEPOSIT_REVIEW_FAILED',
