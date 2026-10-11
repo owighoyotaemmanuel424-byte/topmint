@@ -7,7 +7,10 @@ import { notify } from '../../../lib/notifications';
 import { prisma } from '../../../lib/db/prisma';
 import { respondWithError } from '../../../lib/db-error';
 
-const bodySchema = z.object({\n  planId: z.string().min(1).max(128),\n  amount: z.coerce.number().finite().positive().max(100000000).refine(value => Number(value.toFixed(2)) >= 0.01, 'Amount must be at least $0.01'),\n});
+const bodySchema = z.object({
+  planId: z.string().min(1).max(128),
+  amount: z.coerce.number().finite().positive().max(100000000).refine(value => Number(value.toFixed(2)) >= 0.01, 'Amount must be at least $0.01'),
+});
 
 export default async function handler(req, res) {
   const user = await getAuthenticatedUser(req);
