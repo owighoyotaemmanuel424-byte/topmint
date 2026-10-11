@@ -9,7 +9,7 @@ import { respondWithError } from '../../../lib/db-error';
 
 const bodySchema = z.object({
   planId: z.string().min(1).max(128),
-  amount: z.string().or(z.number()).transform(String).refine(value => /^\\d{1,10}(\\.\\d{1,2})?$/.test(value), 'Enter a valid amount with up to two decimal places.'),
+  amount: z.string().or(z.number()).transform(String).refine(value => /^\d{1,10}(\.\d{1,2})?$/.test(value), 'Enter a valid amount with up to two decimal places.'),
   idempotencyKey: z.string().uuid(),
 });
 
