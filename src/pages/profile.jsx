@@ -58,7 +58,7 @@ export default function Profile() {
     }
   };
 
-  if (loading) return <main style={styles.page}><h2>Loading your account...</h2></main>;
+  if (loading) return <main style={styles.page} className="tm-profile-page"><h2>Loading your account...</h2></main>;
   if (!user) return null;
 
   const balance = Number(user.wallet?.balance || 0);
