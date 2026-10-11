@@ -171,7 +171,7 @@ export default function Transactions() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#071c18" />
       </Head>
-      <main style={s.page}>
+      <main style={s.page} className="tm-transactions-page">
         <div className="tm-portal-shell">
           <PortalHeader unread={unread} />
 
