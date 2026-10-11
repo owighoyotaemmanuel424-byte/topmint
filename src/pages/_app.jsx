@@ -5,6 +5,7 @@ import '../styles/signup.css';
 import '../styles/home.css';
 import '../styles/global.css';
 import '../styles/app-theme.css';
+import '../styles/customer-rebuild.css';
 import Head from "next/head";
 import ThemeProvider from '../../providers/ThemeProvider';
 import { AnimatePresence } from 'framer-motion';
