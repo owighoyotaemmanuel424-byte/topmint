@@ -188,3 +188,58 @@
   .topmint-app-shell > main:not(.home-page-root) header { gap: 12px !important; }
   .topmint-app-shell > main:not(.home-page-root) button { max-width: 100%; }
 }
+
+/* Unified palette layer: apply the landing-page colors to the actual page root
+   and all nested legacy components, without recoloring the public landing page. */
+.topmint-page-root {
+  display: contents;
+  color: var(--tm-landing-text);
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) {
+  color: var(--tm-landing-text);
+  color-scheme: dark;
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is(h1,h2,h3,h4,h5,h6,p,label,small,strong,b,legend,caption,th,td,li) {
+  color: var(--tm-landing-text);
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea) {
+  background-color: #020b1a;
+  color: var(--tm-landing-text);
+  border: 1px solid var(--tm-landing-border);
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is(input,select,textarea,button,a,[role="button"]):focus-visible {
+  outline: 2px solid var(--tm-landing-gold);
+  outline-offset: 2px;
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is(button,[role="button"],input[type="submit"]) {
+  border-color: var(--tm-landing-border);
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is(section,article,aside,fieldset,[class*="card"],[class*="Card"],[class*="panel"],[class*="Panel"],[class*="container"],[class*="Container"],[class*="modal"],[class*="Modal"],[class*="dropdown"],[class*="Dropdown"]) {
+  border-color: var(--tm-landing-border);
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is(table,thead,tbody,tr,th,td) {
+  border-color: var(--tm-landing-border);
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) a:not([class*="button"]):not([class*="Button"]) {
+  color: #b9dfff;
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) a:not([class*="button"]):not([class*="Button"]):hover {
+  color: var(--tm-landing-gold);
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is([class*="active"],[aria-current="page"],[aria-selected="true"]) {
+  border-color: rgba(6,114,205,.55);
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is([class*="primary"],[class*="Primary"],[class*="submit"],[class*="Submit"],[class*="cta"],[class*="Cta"],[class*="fancyBtn"],[class*="fancybg"]) {
+  --tm-action-gradient: var(--tm-landing-gradient);
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is([class*="primary"],[class*="Primary"],[class*="submit"],[class*="Submit"],[class*="cta"],[class*="Cta"],[class*="fancyBtn"]) {
+  background: var(--tm-landing-gradient);
+  color: #fff;
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is([class*="sidebar"],[class*="Sidebar"],[class*="navbar"],[class*="Navbar"],[class*="navigation"],[class*="Navigation"],[class*="header"],[class*="Header"],[class*="menu"],[class*="Menu"]) {
+  border-color: var(--tm-landing-border);
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is([class*="muted"],[class*="Muted"],[class*="secondaryText"],[class*="subtitle"],[class*="Subtitle"],[class*="hint"],[class*="Hint"],[class*="placeholder"]) {
+  color: var(--tm-landing-muted);
+}
+
