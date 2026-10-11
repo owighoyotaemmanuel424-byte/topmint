@@ -4,6 +4,7 @@ import '../styles/dashboard-app.css';
 import '../styles/signup.css';
 import '../styles/home.css';
 import '../styles/global.css';
+import '../styles/app-theme.css';
 import Head from "next/head";
 import ThemeProvider from '../../providers/ThemeProvider';
 import { AnimatePresence } from 'framer-motion';
@@ -14,7 +15,7 @@ export default function App({ Component, pageProps }) {
   return (
     <ThemeProvider>
       <AnimatePresence mode='wait'>
-        <main>
+        <main className="topmint-app-shell">
           <Head>
             <title>TopmintInvest</title>
             <meta charSet="UTF-8"/>
