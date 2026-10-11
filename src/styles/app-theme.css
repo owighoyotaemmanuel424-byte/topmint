@@ -427,3 +427,111 @@
     transition-duration: .01ms !important;
   }
 }
+
+
+/* TopMint dashboard refresh — mobile-first midnight/mint treatment */
+.tm-side {
+  background: #050d22 !important;
+  border-right: 1px solid rgba(169, 199, 255, .12) !important;
+}
+.tm-main {
+  background: #050d22 !important;
+  color: #f4f7ff !important;
+}
+.tm-main .tm-topbar { color: #f4f7ff !important; }
+.tm-main .tm-topbar h1,
+.tm-main .tm-topbar strong,
+.tm-main .tm-panel h2 { color: #f4f7ff !important; }
+.tm-main .tm-hero {
+  background: linear-gradient(145deg, #101d3b 0%, #172644 100%) !important;
+  border: 1px solid rgba(160, 187, 237, .16) !important;
+  box-shadow: 0 18px 50px rgba(0,0,0,.22) !important;
+}
+.tm-main .tm-hero .tm-hero-button,
+.tm-main .tm-hero button:first-child {
+  background: #65efbd !important;
+  color: #04182a !important;
+}
+.tm-main .tm-hero button:last-child {
+  border-color: rgba(101,239,189,.42) !important;
+}
+.tm-main .tm-stats article,
+.tm-main .tm-content > section,
+.tm-main > section:not(.tm-hero) {
+  background: #101b34 !important;
+  color: #f4f7ff !important;
+  border-color: rgba(160,187,237,.15) !important;
+}
+.tm-main .tm-stats article h3,
+.tm-main .tm-content strong,
+.tm-main .tm-content h2,
+.tm-main > section strong { color: #f4f7ff !important; }
+.tm-main .tm-stats article p,
+.tm-main .tm-content small,
+.tm-main .tm-content p,
+.tm-main .tm-footer { color: #9eacc7 !important; }
+.tm-main .tm-hero .tm-balance { color: #fff !important; }
+.tm-main .tm-mobile-nav { display: none; }
+@media (max-width: 760px) {
+  .tm-side { display: none !important; }
+  .tm-main {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 20px 15px 104px !important;
+    overflow: hidden;
+  }
+  .tm-main .tm-topbar { margin-bottom: 18px !important; align-items: flex-start !important; }
+  .tm-main .tm-topbar h1 { font-size: 24px !important; }
+  .tm-main .tm-userbox > div:nth-child(2) { display: none !important; }
+  .tm-main .tm-hero {
+    border-radius: 23px !important;
+    padding: 23px 20px 0 !important;
+    margin-bottom: 14px !important;
+  }
+  .tm-main .tm-hero .tm-balance { font-size: clamp(30px, 8vw, 40px) !important; }
+  .tm-main .tm-hero .tm-hero-actions { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px !important; margin: 20px 0 20px !important; }
+  .tm-main .tm-hero .tm-hero-actions button { min-height: 48px; justify-content: center; }
+  .tm-main .tm-hero .tm-hero-footer { flex-wrap: wrap; }
+  .tm-main .tm-stats { grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 10px !important; }
+  .tm-main .tm-stats article { padding: 14px !important; border-radius: 15px !important; }
+  .tm-main .tm-stats article:last-child { grid-column: 1 / -1; }
+  .tm-main .tm-content { grid-template-columns: minmax(0,1fr) !important; gap: 0 !important; }
+  .tm-main .tm-content > section,
+  .tm-main > section:not(.tm-hero) { padding: 17px 15px !important; border-radius: 17px !important; }
+  .tm-main .tm-mobile-nav {
+    display: grid !important;
+    position: fixed !important;
+    z-index: 1000;
+    left: 10px;
+    right: 10px;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    grid-template-columns: repeat(5,minmax(0,1fr));
+    gap: 2px;
+    padding: 10px 5px calc(8px + env(safe-area-inset-bottom));
+    border: 1px solid rgba(177,200,242,.18);
+    border-radius: 20px;
+    background: rgba(7,16,39,.96);
+    box-shadow: 0 12px 36px rgba(0,0,0,.35);
+    backdrop-filter: blur(18px);
+  }
+  .tm-main .tm-mobile-nav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 42px;
+    color: #9eacc7 !important;
+    text-decoration: none;
+    font-size: 19px;
+  }
+  .tm-main .tm-mobile-nav a:first-child { color: #65efbd !important; }
+  .tm-main .tm-mobile-nav small { color: inherit !important; font-size: 10px; }
+  .tm-main .tm-footer { padding-bottom: 14px; }
+}
+@media (max-width: 380px) {
+  .tm-main { padding-left: 11px !important; padding-right: 11px !important; }
+  .tm-main .tm-hero { padding-left: 16px !important; padding-right: 16px !important; }
+  .tm-main .tm-hero .tm-hero-actions { grid-template-columns: minmax(0,1fr) !important; }
+}
