@@ -34,8 +34,23 @@ export default async function handler(req, res) {
     if (!allowed.includes(rawStatus)) return res.status(400).json({ error: 'Invalid deposit status filter' });
 
     try {
+      const search = typeof req.query.search === 'string' ? req.query.search.trim().slice(0, 160) : '';
+      const from = typeof req.query.from === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(req.query.from) ? new Date(req.query.from + 'T00:00:00.000Z') : null;
+      const to = typeof req.query.to === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(req.query.to) ? new Date(req.query.to + 'T23:59:59.999Z') : null;
+      if ((from && Number.isNaN(from.getTime())) || (to && Number.isNaN(to.getTime())) || (from && to && from > to)) return res.status(400).json({ error: 'Invalid deposit date range' });
+      const where = {
+        ...(rawStatus === 'ALL' ? {} : { status: rawStatus }),
+        ...((from || to) ? { createdAt: { ...(from ? { gte: from } : {}), ...(to ? { lte: to } : {}) } } : {}),
+        ...(search ? { OR: [
+          { transaction: { reference: { contains: search, mode: 'insensitive' } } },
+          { providerRef: { contains: search, mode: 'insensitive' } },
+          { user: { email: { contains: search, mode: 'insensitive' } } },
+          { user: { firstName: { contains: search, mode: 'insensitive' } } },
+          { user: { lastName: { contains: search, mode: 'insensitive' } } },
+        ] } : {}),
+      };
       const deposits = await prisma.deposit.findMany({
-        where: rawStatus === 'ALL' ? {} : { status: rawStatus },
+        where,
         orderBy: { createdAt: 'asc' },
         take: 100,
         include: {
