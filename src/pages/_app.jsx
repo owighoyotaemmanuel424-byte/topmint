@@ -30,7 +30,7 @@ export default function App({ Component, pageProps }) {
           <div>
             <a href="https://wa.me/12077707820" target="_blank" rel="noopener noreferrer" color="#4dc247" id="absWa"><img src="/whatsapp.svg" alt="whatsapp" /></a>
           </div>
-          <Component {...pageProps} />
+          <div className="topmint-page-root"><Component {...pageProps} /></div>
         </main>
       </AnimatePresence>
     </ThemeProvider>
