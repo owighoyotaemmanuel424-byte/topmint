@@ -78,7 +78,7 @@ export default function AdminWithdrawals() {
         <div><Link href="/dashboard_admin" style={s.back}>← Dashboard</Link><p style={s.eyebrow}>TOPMINT OPERATIONS</p><h1 style={s.title}>Withdrawal operations</h1><p style={s.subtitle}>Review withdrawal requests, record decisions, and keep customer wallet balances consistent.</p></div>
         <button style={s.button} onClick={logout}>Sign out</button>
       </header>
-      <section style={s.notice}><strong>Important payout control</strong><span>Approval records that a request is approved for payout; it does not transfer funds automatically. Complete the bank transfer separately. Rejection returns the reserved withdrawal amount to the customer's wallet and is recorded in the audit log.</span></section>
+      <section style={s.notice}><strong>Important payout control</strong><span>Approval records that a request is approved for payout; it does not transfer funds automatically. Complete the bank transfer separately. Rejection returns the reserved withdrawal amount to the customer&apos;s wallet and is recorded in the audit log.</span></section>
       <div style={s.toolbar}><label style={s.filter}>Show requests<select style={s.select} value={status} onChange={e => setStatus(e.target.value)}><option value="PENDING">Pending review</option><option value="COMPLETED">Approved</option><option value="FAILED">Rejected</option><option value="ALL">All statuses</option></select></label><button style={s.button} disabled={busy} onClick={load}>{busy ? 'Loading…' : 'Refresh'}</button></div>
       {message && <p role="status" style={s.success}>{message}</p>}
       {error && <p role="alert" style={s.error}>{error}</p>}
