@@ -130,7 +130,7 @@ export default function Transactions() {
   // Keep the address bar in step with the applied filters.
   useEffect(() => {
     if (!router.isReady) return;
-    router.replace({ pathname: '/transactions', query: Object.fromEntries(new URLSearchParams(queryString)) }, undefined, { shallow: true });
+    router.replace({ pathname: '/dashboard/transactions', query: Object.fromEntries(new URLSearchParams(queryString)) }, undefined, { shallow: true });
   }, [queryString, router]);
 
   const apply = event => {
