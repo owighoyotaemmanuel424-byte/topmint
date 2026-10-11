@@ -208,7 +208,7 @@ export default function Dashboard() {
         .tm-hero-actions button { flex: 1; min-width: 115px; padding: 12px 10px !important; }
         .tm-hero-footer { gap: 7px !important; flex-wrap: wrap; line-height: 1.5; }
         .tm-hero-footer span:last-child { width: 100%; margin: 3px 0 0 !important; }
-        .tm-stats { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; }
+        .tm-stats { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
         .tm-stats article { padding: 14px !important; border-radius: 14px !important; }
         .tm-stats article:first-child { grid-column: 1 / -1; }
         .tm-stats article h3 { font-size: 24px !important; }
