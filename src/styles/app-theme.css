@@ -269,3 +269,161 @@
   border-color: var(--tm-landing-border);
 }
 
+
+
+/* TopMint responsive design system — mobile-first refinements across customer,
+   admin, authentication, transaction, and investment screens. The public
+   landing page retains its own existing layout and styling. */
+.topmint-page-root:not(:has(.HomefirstPageCtn)) {
+  --tm-radius-sm: 10px;
+  --tm-radius-md: 16px;
+  --tm-radius-lg: 22px;
+  --tm-space: clamp(14px, 2.4vw, 24px);
+  width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  -webkit-tap-highlight-color: transparent;
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is(main,[role="main"]) {
+  min-width: 0;
+  max-width: 100%;
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is(h1,h2,h3,h4) {
+  line-height: 1.2;
+  letter-spacing: -.025em;
+  text-wrap: balance;
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) h1 { font-size: clamp(1.55rem, 3.4vw, 2.35rem); }
+.topmint-page-root:not(:has(.HomefirstPageCtn)) h2 { font-size: clamp(1.2rem, 2.5vw, 1.7rem); }
+.topmint-page-root:not(:has(.HomefirstPageCtn)) p {
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is(section,article,aside,fieldset,[class*="card"],[class*="Card"],[class*="panel"],[class*="Panel"],[class*="modal"],[class*="Modal"]) {
+  border: 1px solid var(--tm-landing-border);
+  border-radius: var(--tm-radius-md);
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea) {
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 13px;
+  border-radius: var(--tm-radius-sm);
+  font-size: 16px;
+  line-height: 1.4;
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) textarea { min-height: 112px; resize: vertical; }
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is(button,[role="button"],input[type="submit"],input[type="button"]) {
+  min-height: 42px;
+  max-width: 100%;
+  padding: 10px 15px;
+  border-radius: var(--tm-radius-sm);
+  font-weight: 650;
+  line-height: 1.25;
+  white-space: normal;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform .16s ease, filter .16s ease, box-shadow .16s ease;
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is(button,[role="button"],input[type="submit"]):active {
+  transform: translateY(1px);
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is(button:disabled,[role="button"][aria-disabled="true"]) {
+  cursor: not-allowed;
+  opacity: .58;
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is(table) {
+  width: 100%;
+  border-collapse: collapse;
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is(th,td) {
+  padding: 12px 14px;
+  text-align: left;
+  vertical-align: middle;
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is(pre,code) { overflow-wrap: anywhere; }
+.topmint-page-root:not(:has(.HomefirstPageCtn)) img,
+.topmint-page-root:not(:has(.HomefirstPageCtn)) video,
+.topmint-page-root:not(:has(.HomefirstPageCtn)) canvas { max-width: 100%; }
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is([class*="table-wrapper"],[class*="TableWrapper"],[class*="tableContainer"],[class*="TableContainer"],.table-responsive) {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is([class*="grid"],[class*="Grid"]) {
+  min-width: 0;
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is([class*="success"],[class*="Success"],[class*="error"],[class*="Error"],[role="alert"],[role="status"]) {
+  overflow-wrap: anywhere;
+}
+@media (hover: hover) and (pointer: fine) {
+  .topmint-page-root:not(:has(.HomefirstPageCtn)) :is(button,[role="button"],a[class*="card"],a[class*="Card"]) {
+    transition: transform .18s ease, border-color .18s ease, filter .18s ease;
+  }
+  .topmint-page-root:not(:has(.HomefirstPageCtn)) a[class*="card"]:hover,
+  .topmint-page-root:not(:has(.HomefirstPageCtn)) a[class*="Card"]:hover {
+    transform: translateY(-2px);
+    border-color: rgba(6,114,205,.55);
+  }
+}
+@media (max-width: 768px) {
+  .topmint-page-root:not(:has(.HomefirstPageCtn)) {
+    font-size: 15px;
+  }
+  .topmint-page-root:not(:has(.HomefirstPageCtn)) :is(main,[role="main"]) {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .topmint-page-root:not(:has(.HomefirstPageCtn)) :is(header,[class*="toolbar"],[class*="Toolbar"],[class*="pageHeader"],[class*="PageHeader"]) {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .topmint-page-root:not(:has(.HomefirstPageCtn)) :is([class*="grid"],[class*="Grid"]) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .topmint-page-root:not(:has(.HomefirstPageCtn)) :is([class*="card"],[class*="Card"],[class*="panel"],[class*="Panel"]) {
+    min-width: 0;
+    padding: clamp(12px, 3vw, 18px);
+  }
+  .topmint-page-root:not(:has(.HomefirstPageCtn)) :is(table) {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  .topmint-page-root:not(:has(.HomefirstPageCtn)) :is(form) {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .topmint-page-root:not(:has(.HomefirstPageCtn)) :is(form > div,[class*="formRow"],[class*="FormRow"]) {
+    min-width: 0;
+  }
+}
+@media (max-width: 480px) {
+  .topmint-page-root:not(:has(.HomefirstPageCtn)) :is(main,[role="main"]) {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .topmint-page-root:not(:has(.HomefirstPageCtn)) :is([class*="grid"],[class*="Grid"]) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .topmint-page-root:not(:has(.HomefirstPageCtn)) :is(button,[role="button"],input[type="submit"]) {
+    min-height: 44px;
+  }
+  .topmint-page-root:not(:has(.HomefirstPageCtn)) :is([class*="actions"],[class*="Actions"],[class*="buttonGroup"],[class*="ButtonGroup"]) {
+    flex-wrap: wrap;
+  }
+  .topmint-page-root:not(:has(.HomefirstPageCtn)) :is([class*="stat"],[class*="Stat"]) {
+    min-width: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .topmint-page-root:not(:has(.HomefirstPageCtn)) *,
+  .topmint-page-root:not(:has(.HomefirstPageCtn)) *::before,
+  .topmint-page-root:not(:has(.HomefirstPageCtn)) *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
