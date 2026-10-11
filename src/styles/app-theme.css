@@ -243,3 +243,29 @@
   color: var(--tm-landing-muted);
 }
 
+/* Final component-level overrides take precedence over older page styles. */
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is(section,article,aside,fieldset,[class*="card"],[class*="Card"],[class*="panel"],[class*="Panel"],[class*="modal"],[class*="Modal"],[class*="dropdown"],[class*="Dropdown"]) {
+  background-color: var(--tm-landing-surface) !important;
+  color: var(--tm-landing-text) !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,.16);
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is(header,[class*="sidebar"],[class*="Sidebar"],[class*="navbar"],[class*="Navbar"],[class*="navigation"],[class*="Navigation"],[class*="menu"],[class*="Menu"]) {
+  background-color: var(--tm-landing-surface) !important;
+  color: var(--tm-landing-text) !important;
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) button:not([class*="primary"]):not([class*="Primary"]):not([class*="submit"]):not([class*="Submit"]):not([class*="fancyBtn"]),
+.topmint-page-root:not(:has(.HomefirstPageCtn)) [role="button"]:not([class*="primary"]):not([class*="Primary"]) {
+  background-color: var(--tm-landing-surface-raised);
+  color: var(--tm-landing-text);
+  border: 1px solid var(--tm-landing-border);
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is([class*="primary"],[class*="Primary"],[class*="submit"],[class*="Submit"],[class*="cta"],[class*="Cta"],[class*="fancyBtn"]) {
+  background: var(--tm-landing-gradient) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+.topmint-page-root:not(:has(.HomefirstPageCtn)) :is([class*="purple"],[class*="Purple"],[class*="violet"],[class*="Violet"]) {
+  background-color: var(--tm-landing-surface-raised);
+  border-color: var(--tm-landing-border);
+}
+
