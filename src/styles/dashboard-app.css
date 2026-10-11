@@ -243,3 +243,21 @@
     padding: 18px 16px;
   }
 }
+
+
+/* Hard overrides for the customer dashboard on small touch screens. */
+@media screen and (max-width: 640px) {
+  body:has(.tm-main) { overflow-x: hidden !important; }
+  .tm-main { width: 100% !important; max-width: 100vw !important; min-width: 0 !important; padding: 18px 14px 118px !important; margin: 0 !important; }
+  .tm-stats { display: flex !important; flex-direction: column !important; width: 100% !important; gap: 12px !important; }
+  .tm-stats > * { display: block !important; width: 100% !important; max-width: none !important; min-width: 0 !important; grid-column: auto !important; flex: 0 0 auto !important; }
+  .tm-content { display: flex !important; flex-direction: column !important; width: 100% !important; gap: 0 !important; }
+  .tm-content > * { width: 100% !important; min-width: 0 !important; }
+  .tm-market-strip { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; width: 100% !important; overflow: visible !important; }
+  .tm-market-strip > * { min-width: 0 !important; }
+  .tm-market-strip > :first-child { grid-column: 1 / -1 !important; }
+  .tm-mobile-nav { left: 12px !important; right: 12px !important; bottom: calc(10px + env(safe-area-inset-bottom)) !important; width: auto !important; border-radius: 18px !important; min-height: 64px !important; background: rgba(255,255,255,.98) !important; border: 1px solid rgba(15,55,40,.12) !important; }
+  .tm-mobile-nav a { flex: 1 !important; min-width: 0 !important; color: #426052 !important; }
+  .tm-mobile-nav a:first-of-type { background: #edf7e8 !important; color: #176342 !important; }
+  #absWa { width: 46px !important; bottom: calc(88px + env(safe-area-inset-bottom)) !important; left: 12px !important; z-index: 90 !important; }
+}
