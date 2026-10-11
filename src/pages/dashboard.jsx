@@ -174,8 +174,69 @@ export default function Dashboard() {
         </section>
         <footer style={s.footer} className="tm-footer"><span>© {new Date().getFullYear()} TopMint</span><span>USD is the platform&apos;s primary currency for new wallets. Historical balances retain their recorded currency.</span></footer>
       </section>
-      <nav style={s.mobileNav} className="tm-mobile-nav"><Link href="/dashboard">⌂<small>Home</small></Link><Link href="/deposit">＋<small>Fund</small></Link><Link href="/investments">◫<small>Invest</small></Link><Link href="/dashboard/transactions">↔<small>Activity</small></Link><Link href="/profile">◎<small>Profile</small></Link></nav>
+      <nav style={s.mobileNav} className="tm-mobile-nav" aria-label="Mobile navigation"><Link href="/dashboard"><span>⌂</span><small>Home</small></Link><Link href="/deposit"><span>＋</span><small>Fund</small></Link><Link href="/investments"><span>◫</span><small>Invest</small></Link><Link href="/dashboard/transactions"><span>↔</span><small>Activity</small></Link><Link href="/profile"><span>◎</span><small>Profile</small></Link></nav>
     </main>
+    <style jsx global>{`
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body { overflow-x: hidden; }
+      .tm-side { z-index: 20; }
+      .tm-main { min-width: 0; }
+      .tm-hero, .tm-market-strip, .tm-stats, .tm-content, .tm-activity-chart { min-width: 0; }
+      .tm-userbox > div:nth-child(2) { min-width: 0; }
+      .tm-userbox > div:nth-child(2) strong, .tm-userbox > div:nth-child(2) small { overflow-wrap: anywhere; }
+      .tm-mobile-nav { display: none !important; }
+      @media (max-width: 1100px) {
+        .tm-side { width: 205px !important; padding: 22px 12px !important; }
+        .tm-main { width: calc(100% - 205px) !important; padding: 26px 22px 28px !important; }
+        .tm-market-strip { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+        .tm-market-strip > div:first-child { grid-column: 1 / -1; }
+        .tm-content { grid-template-columns: minmax(0, 1fr) !important; gap: 0 !important; }
+      }
+      @media (max-width: 720px) {
+        .tm-side { display: none !important; }
+        .tm-main { width: 100% !important; max-width: 100% !important; padding: 22px 15px calc(94px + env(safe-area-inset-bottom)) !important; margin: 0 !important; }
+        .tm-topbar { align-items: flex-start !important; gap: 12px !important; margin-bottom: 18px !important; }
+        .tm-topbar .tm-userbox { gap: 8px !important; flex-wrap: wrap; justify-content: flex-end; }
+        .tm-userbox > div:nth-child(2) { display: none; }
+        .tm-userbox .tm-signout { display: inline-flex !important; align-items: center; justify-content: center; font-size: 11px; }
+        .tm-topbar h1 { font-size: 25px !important; }
+        .tm-hero { padding: 23px 20px 0 !important; border-radius: 19px !important; }
+        .tm-hero-symbol { right: 12px !important; top: 20px !important; font-size: 116px !important; }
+        .tm-balance { font-size: clamp(28px, 8vw, 38px) !important; letter-spacing: -1.2px !important; }
+        .tm-hero-actions { gap: 8px !important; margin: 20px 0 20px !important; }
+        .tm-hero-actions button { flex: 1; min-width: 115px; padding: 12px 10px !important; }
+        .tm-hero-footer { gap: 7px !important; flex-wrap: wrap; line-height: 1.5; }
+        .tm-hero-footer span:last-child { width: 100%; margin: 3px 0 0 !important; }
+        .tm-stats { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; }
+        .tm-stats article { padding: 14px !important; border-radius: 14px !important; }
+        .tm-stats article:first-child { grid-column: 1 / -1; }
+        .tm-stats article h3 { font-size: 24px !important; }
+        .tm-market-strip { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 9px !important; }
+        .tm-market-strip > div:first-child { grid-column: 1 / -1; }
+        .tm-market-strip > div { border-radius: 14px !important; }
+        .tm-market-strip > div:first-child { padding: 16px !important; }
+        .tm-market-strip > div:not(:first-child) { padding: 13px !important; }
+        .tm-activity-chart, .tm-content > section, .tm-main > section[style] { padding: 17px 15px !important; border-radius: 15px !important; }
+        .tm-content { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; }
+        .tm-main .tm-footer { flex-direction: column; gap: 7px; line-height: 1.5; }
+        .tm-main .tm-footer span:last-child { overflow-wrap: anywhere; }
+        .tm-mobile-nav { display: flex !important; position: fixed !important; z-index: 100 !important; left: 12px !important; right: 12px !important; bottom: calc(10px + env(safe-area-inset-bottom)) !important; min-height: 64px; align-items: center; justify-content: space-around; gap: 4px; padding: 7px 5px !important; border: 1px solid rgba(15, 55, 40, .12); border-radius: 18px; background: rgba(255,255,255,.96); box-shadow: 0 10px 32px rgba(13,48,38,.18); backdrop-filter: blur(18px); }
+        .tm-mobile-nav a { display: flex !important; flex: 1; min-width: 0; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 4px 1px; color: #426052; text-decoration: none; font-size: 20px; line-height: 1; border-radius: 10px; }
+        .tm-mobile-nav a:first-child { color: #176342; background: #edf7e8; }
+        .tm-mobile-nav a small { font-size: 9px; font-weight: 700; letter-spacing: .1px; }
+      }
+      @media (max-width: 380px) {
+        .tm-main { padding-left: 11px !important; padding-right: 11px !important; }
+        .tm-topbar h1 { font-size: 22px !important; }
+        .tm-userbox .tm-signout { padding: 8px 9px !important; }
+        .tm-stats { grid-template-columns: minmax(0, 1fr) !important; }
+        .tm-stats article:first-child { grid-column: auto; }
+        .tm-market-strip { grid-template-columns: minmax(0, 1fr) !important; }
+        .tm-market-strip > div:first-child { grid-column: auto; }
+        .tm-section-head, .tm-main .sectionHead { align-items: flex-start; }
+      }
+    `}</style>
   </>;
 }
 
