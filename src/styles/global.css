@@ -1,15 +1,15 @@
 :root {
   --primary-clr: #0672CD;
-  --sec2-clr: #9864AD;
+  --sec2-clr: #0b1830;
   --sec-clr: #D8A31A;
   --text-clr1: #F5F9FF;
-  --text-deco: #F3F9FF;
+  --text-deco: #F5F9FF;
   --white-purple: #b9dfff;
   --dark-clr1: #000613;
   --dark-clr2: #070e1e;
-  --dark-clr3: #020d25;
-  --dark-clr4: #002848;
-  --dark-clr5: #070032;
+  --dark-clr3: #020b1a;
+  --dark-clr4: #071a35;
+  --dark-clr5: #0b1830;
 
   --opac-clr1: #00123345;
   --opac-clr2: #0263b37d;
