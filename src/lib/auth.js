@@ -6,8 +6,8 @@ const getSecret = (name) => {
   return new TextEncoder().encode(value);
 };
 
-export async function createAuthToken(userId) {
-  return new SignJWT({ sub: userId, type: 'user' })
+export async function createAuthToken(userId, sessionVersion = 0) {
+  return new SignJWT({ sub: userId, type: 'user', sv: sessionVersion })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d')
@@ -50,4 +50,12 @@ export async function verifyAdminToken(token) {
   } catch {
     return null;
   }
+}
+
+export async function verifyAuthClaims(token) {
+  if (!token) return null;
+  try {
+    const { payload } = await jwtVerify(token, getSecret('JWT_SECRET'));
+    return payload.type === 'user' && typeof payload.sub === 'string' ? payload : null;
+  } catch { return null; }
 }
