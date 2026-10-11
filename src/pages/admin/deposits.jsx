@@ -13,6 +13,9 @@ const money = (value, currency = 'USD') => {
 export default function AdminDeposits() {
   const router = useRouter();
   const [status, setStatus] = useState('PENDING');
+  const [search, setSearch] = useState('');
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
   const [deposits, setDeposits] = useState([]);
   const [busy, setBusy] = useState(true);
   const [activeId, setActiveId] = useState('');
@@ -26,7 +29,11 @@ export default function AdminDeposits() {
     setBusy(true);
     setError('');
     try {
-      const response = await requestJson('/api/admin/deposits?status=' + encodeURIComponent(status));
+      const params = new URLSearchParams({ status });
+      if (search.trim()) params.set('search', search.trim());
+      if (from) params.set('from', from);
+      if (to) params.set('to', to);
+      const response = await requestJson('/api/admin/deposits?' + params.toString());
       if (!response.ok) throw new Error(apiErrorMessage(response, 'Unable to load deposit requests'));
       setDeposits(response.data.deposits || []);
     } catch (e) {
@@ -35,7 +42,7 @@ export default function AdminDeposits() {
     } finally {
       setBusy(false);
     }
-  }, [status, router]);
+  }, [status, search, from, to, router]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -100,7 +107,10 @@ export default function AdminDeposits() {
             <option value="PENDING">Pending review</option><option value="COMPLETED">Approved</option><option value="FAILED">Rejected</option><option value="ALL">All statuses</option>
           </select>
         </label>
-        <button style={s.refresh} onClick={load} disabled={busy}>{busy ? 'Loading…' : 'Refresh'}</button>
+        <label style={s.filterLabel}>Search customer / reference<input style={s.select} value={search} onChange={e => setSearch(e.target.value)} placeholder="Email or deposit reference" maxLength={160} /></label>
+        <label style={s.filterLabel}>From<input style={s.select} type="date" value={from} onChange={e => setFrom(e.target.value)} /></label>
+        <label style={s.filterLabel}>To<input style={s.select} type="date" value={to} onChange={e => setTo(e.target.value)} /></label>
+        <button style={s.refresh} onClick={load} disabled={busy}>{busy ? 'Loading…' : 'Apply / refresh'}</button>
       </div>
       {message && <p role="status" style={s.success}>{message}</p>}
       {error && <p role="alert" style={s.error}>{error}</p>}
