@@ -30,6 +30,27 @@
 .topmint-app-shell > main:not(.home-page-root) td {
   font-family: Inter, Montserrat, Arial, sans-serif !important;
 }
+.topmint-app-shell > main:not(.home-page-root) h1,
+.topmint-app-shell > main:not(.home-page-root) h2,
+.topmint-app-shell > main:not(.home-page-root) h3,
+.topmint-app-shell > main:not(.home-page-root) h4,
+.topmint-app-shell > main:not(.home-page-root) p,
+.topmint-app-shell > main:not(.home-page-root) label,
+.topmint-app-shell > main:not(.home-page-root) strong,
+.topmint-app-shell > main:not(.home-page-root) small,
+.topmint-app-shell > main:not(.home-page-root) span,
+.topmint-app-shell > main:not(.home-page-root) b,
+.topmint-app-shell > main:not(.home-page-root) li,
+.topmint-app-shell > main:not(.home-page-root) th,
+.topmint-app-shell > main:not(.home-page-root) td {
+  color: var(--tm-landing-text) !important;
+}
+.topmint-app-shell > main:not(.home-page-root) [class*="success"],
+.topmint-app-shell > main:not(.home-page-root) [class*="Success"],
+.topmint-app-shell > main:not(.home-page-root) [class*="error"],
+.topmint-app-shell > main:not(.home-page-root) [class*="Error"] {
+  border-color: var(--tm-landing-border) !important;
+}
 .topmint-app-shell > main:not(.home-page-root) a { color: #b9dfff; }
 .topmint-app-shell > main:not(.home-page-root) a:hover { color: #D8A31A; }
 .topmint-app-shell > main:not(.home-page-root) section,
