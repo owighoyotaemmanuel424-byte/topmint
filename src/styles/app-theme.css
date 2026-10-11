@@ -589,3 +589,86 @@
   .tm-main .tm-content > section button,
   .tm-main .tm-topbar button { min-height: 42px; }
 }
+
+
+/* Shared TopMint navy/mint visual system for investment and wallet flows */
+:is(.tm-investments-page,.tm-deposit-page,.tm-withdraw-page) {
+  min-height: 100vh !important;
+  background: radial-gradient(ellipse at 85% 0%, rgba(36,77,139,.22), transparent 38%), #050d22 !important;
+  color: #f4f7ff !important;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  padding-bottom: max(32px, env(safe-area-inset-bottom)) !important;
+}
+:is(.tm-investments-page,.tm-deposit-page,.tm-withdraw-page) :is(header,section,div) {
+  color: inherit;
+}
+:is(.tm-investments-page,.tm-deposit-page,.tm-withdraw-page) :is(h1,h2,h3,b,strong) {
+  color: #f4f7ff;
+}
+:is(.tm-investments-page,.tm-deposit-page,.tm-withdraw-page) :is(p,small,label) {
+  color: #a9b8d3;
+}
+:is(.tm-investments-page,.tm-deposit-page,.tm-withdraw-page) :is(section[style*="background: rgb(255, 255, 255)"],section) {
+  border-color: rgba(160,187,237,.17) !important;
+}
+:is(.tm-investments-page,.tm-deposit-page,.tm-withdraw-page) :is(button[style*="background: rgb(255, 255, 255)"],button[style*="background: white"]) {
+  background: #101b34 !important;
+  color: #eaf1ff !important;
+  border-color: rgba(160,187,237,.22) !important;
+}
+:is(.tm-investments-page,.tm-deposit-page,.tm-withdraw-page) :is(input,select,textarea) {
+  color: #f4f7ff !important;
+  background: #0a142b !important;
+  border-color: rgba(160,187,237,.25) !important;
+  border-radius: 10px;
+  max-width: 100%;
+}
+:is(.tm-investments-page,.tm-deposit-page,.tm-withdraw-page) input::placeholder {
+  color: #7184a6 !important;
+}
+:is(.tm-investments-page,.tm-deposit-page,.tm-withdraw-page) :is(button[style*="background: rgb(23, 79, 57)"],button[style*="background: rgb(23, 61, 44)"],button[type="submit"]) {
+  background: #65efbd !important;
+  color: #04182a !important;
+  border-color: transparent !important;
+}
+:is(.tm-investments-page,.tm-deposit-page,.tm-withdraw-page) :is(a,button) {
+  transition: transform .16s ease, filter .16s ease, border-color .16s ease;
+}
+:is(.tm-investments-page,.tm-deposit-page,.tm-withdraw-page) :is(button,a):focus-visible {
+  outline: 2px solid #65efbd;
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  :is(.tm-investments-page,.tm-deposit-page,.tm-withdraw-page) {
+    padding: 16px 14px 28px !important;
+  }
+  :is(.tm-investments-page,.tm-deposit-page,.tm-withdraw-page) header {
+    gap: 10px !important;
+    flex-wrap: wrap;
+  }
+  :is(.tm-investments-page,.tm-deposit-page,.tm-withdraw-page) :is(button,[role="button"],input[type="submit"]) {
+    min-height: 44px;
+    max-width: 100%;
+  }
+  .tm-investments-page > section,
+  .tm-investments-page > header,
+  .tm-deposit-page > header,
+  .tm-withdraw-page > header {
+    max-width: 100% !important;
+  }
+  :is(.tm-deposit-page,.tm-withdraw-page) :is(form,form > div) {
+    min-width: 0;
+    max-width: 100%;
+  }
+  :is(.tm-deposit-page,.tm-withdraw-page) input {
+    font-size: 16px !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.tm-investments-page,.tm-deposit-page,.tm-withdraw-page) *,
+  :is(.tm-investments-page,.tm-deposit-page,.tm-withdraw-page) *::before,
+  :is(.tm-investments-page,.tm-deposit-page,.tm-withdraw-page) *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
