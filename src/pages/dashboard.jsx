@@ -120,6 +120,10 @@ export default function Dashboard() {
           <article style={s.statCard}><div style={s.statTop}><span style={{...s.statIcon,background:'#f1edff',color:'#7557c7'}}>◷</span><span style={s.statHint}>In progress</span></div><p style={s.statLabel}>Pending transactions</p><h3>{transactions.filter(t => ['PENDING','PROCESSING'].includes(t.status)).length}</h3><p style={s.statFoot}>Awaiting completion</p></article>
           <article style={s.statCard}><div style={s.statTop}><span style={{...s.statIcon,background:'#fff3e7',color:'#a65c16'}}>▤</span><span style={s.statHint}>Explore</span></div><p style={s.statLabel}>Available plans</p><h3>{plans.length}</h3><p style={s.statFoot}>Options available to you</p></article>
         </div>
+        <section style={s.marketStrip} className="tm-market-strip" aria-label="Market overview">
+          <div style={s.marketIntro}><p style={s.kicker}>MARKET PULSE</p><strong>Today&apos;s watchlist</strong><small>Track the assets you care about</small></div>
+          {[['BTC','Bitcoin','$64,210.00','+2.4%',true],['AAPL','Apple','$195.30','+0.8%',true],['NVDA','Nvidia','$128.50','-1.1%',false]].map(([symbol,name,price,change,up]) => <div style={s.marketItem} key={symbol}><div style={s.marketTop}><strong>{symbol}</strong><span style={{...s.marketChange,color:up?'#16805d':'#b42318'}}>{change}</span></div><small>{name}</small><b>{price}</b><div style={{...s.sparkline,background:up?'linear-gradient(135deg, transparent 48%, #60c99a 49%, #60c99a 53%, transparent 54%)':'linear-gradient(135deg, transparent 48%, #e78888 49%, #e78888 53%, transparent 54%)'}} /></div>)}
+        </section>
         <section style={s.panel} className="tm-activity-chart">
           <div style={s.sectionHead}>
             <div><p style={s.kicker}>ACCOUNT SNAPSHOT</p><h2 style={s.sectionTitle}>Recent transaction activity</h2></div>
@@ -210,8 +214,15 @@ const s = {
  heroFooter:{position:'relative',display:'flex',alignItems:'center',gap:8,borderTop:'1px solid rgba(255,255,255,.13)',padding:'15px 0',fontSize:9,letterSpacing:'1px',color:'#a9c8b9'},
  'heroFooter strong':{display:'inline-flex',alignItems:'center',gap:6,fontSize:10,color:'#d7f8ad',letterSpacing:0},
  'heroFooter i':{display:'inline-block',width:6,height:6,borderRadius:10,background:'#b8f36b'},
- statsGrid:{display:'grid',gridTemplateColumns:'repeat(3,minmax(0,1fr))',gap:15,marginBottom:18},
- statCard:{background:'#fff',border:'1px solid #e8eeea',borderRadius:17,padding:'18px 19px',minWidth:0},
+  statsGrid:{display:'grid',gridTemplateColumns:'repeat(3,minmax(0,1fr))',gap:15,marginBottom:18},
+  marketStrip:{display:'grid',gridTemplateColumns:'1.15fr repeat(3,minmax(150px,1fr))',gap:10,alignItems:'stretch',marginBottom:18},
+  marketIntro:{background:'#102f27',color:'#fff',borderRadius:17,padding:'17px 18px',display:'flex',flexDirection:'column',justifyContent:'center',minWidth:0},
+  marketIntroSmall:{color:'#a8c8b7'},
+  marketItem:{position:'relative',overflow:'hidden',background:'#fff',border:'1px solid #e8eeea',borderRadius:17,padding:'15px 15px 17px',minWidth:0},
+  marketTop:{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8},
+  marketChange:{fontSize:10,fontWeight:800},
+  sparkline:{position:'absolute',right:-6,bottom:15,width:55,height:22,opacity:.72,transform:'rotate(-12deg)'},
+  statCard:{background:'#fff',border:'1px solid #e8eeea',borderRadius:17,padding:'18px 19px',minWidth:0},
  statTop:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14},
  statIcon:{width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',borderRadius:11,background:'#e4f5e7',color:'#23704d',fontSize:17,fontWeight:800},
  statHint:{fontSize:10,color:'#8a9992'},
