@@ -58,8 +58,8 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       const status = typeof req.query.status === 'string' && STATUSES.includes(req.query.status) ? req.query.status : 'PENDING';
       const search = typeof req.query.search === 'string' ? req.query.search.trim().slice(0, 160) : '';
-      const from = typeof req.query.from === 'string' && /^\\d{4}-\\d{2}-\\d{2}$/.test(req.query.from) ? new Date(req.query.from + 'T00:00:00.000Z') : null;
-      const to = typeof req.query.to === 'string' && /^\\d{4}-\\d{2}-\\d{2}$/.test(req.query.to) ? new Date(req.query.to + 'T23:59:59.999Z') : null;
+      const from = typeof req.query.from === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(req.query.from) ? new Date(req.query.from + 'T00:00:00.000Z') : null;
+      const to = typeof req.query.to === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(req.query.to) ? new Date(req.query.to + 'T23:59:59.999Z') : null;
       if ((from && Number.isNaN(from.getTime())) || (to && Number.isNaN(to.getTime())) || (from && to && from > to)) return res.status(400).json({ error: 'Invalid withdrawal date range.' });
       const page = Math.max(1, Math.min(100000, Number.parseInt(String(req.query.page || '1'), 10) || 1));
       const where = {
