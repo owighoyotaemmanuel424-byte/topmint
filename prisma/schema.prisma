@@ -44,6 +44,15 @@ enum InvestmentStatus {
   CANCELLED
 }
 
+enum InvestmentCalculationMethod {
+  SIMPLE_FIXED
+  PRINCIPAL_ONLY
+}
+
+enum InvestmentPayoutSchedule {
+  AT_MATURITY
+}
+
 enum NotificationType {
   ACCOUNT
   DEPOSIT
@@ -127,6 +136,12 @@ model InvestmentPlan {
   maximumAmount Decimal? @db.Decimal(20,2)
   durationDays Int
   returnRate Decimal @db.Decimal(8,4)
+  calculationMethod InvestmentCalculationMethod @default(SIMPLE_FIXED)
+  payoutSchedule InvestmentPayoutSchedule @default(AT_MATURITY)
+  maturityConditions String? @db.Text
+  riskDisclosure String? @db.Text
+  feeRate Decimal @default(0) @db.Decimal(8,4)
+  termsVersion Int @default(1)
   active Boolean @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -138,9 +153,14 @@ model Investment {
   id String @id @default(cuid())
   userId String
   planId String
+  reference String @unique
+  requestKey String? @unique
   principal Decimal @db.Decimal(20,2)
   expectedReturn Decimal @db.Decimal(20,2)
   actualReturn Decimal @default(0) @db.Decimal(20,2)
+  accruedEarnings Decimal @default(0) @db.Decimal(20,2)
+  paidEarnings Decimal @default(0) @db.Decimal(20,2)
+  termsSnapshot Json
   status InvestmentStatus @default(ACTIVE)
   startedAt DateTime @default(now())
   maturityAt DateTime
@@ -151,6 +171,7 @@ model Investment {
   @@index([userId, status])
   @@index([planId])
   @@index([maturityAt])
+  @@index([reference])
 }
 
 model Transaction {
