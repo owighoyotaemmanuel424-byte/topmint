@@ -104,7 +104,7 @@ export default function AdminDeposits() {
       <div style={s.toolbar}>
         <label style={s.filterLabel}>Show requests
           <select style={s.select} value={status} onChange={e => setStatus(e.target.value)}>
-            <option value="PENDING">Pending review</option><option value="COMPLETED">Approved</option><option value="FAILED">Rejected</option><option value="ALL">All statuses</option>
+            <option value="PENDING">Pending review</option><option value="COMPLETED">Approved</option><option value="FAILED">Rejected</option><option value="PROCESSING">Processing</option><option value="CANCELLED">Cancelled</option><option value="ALL">All statuses</option>
           </select>
         </label>
         <label style={s.filterLabel}>Search customer / reference<input style={s.select} value={search} onChange={e => setSearch(e.target.value)} placeholder="Email or deposit reference" maxLength={160} /></label>
@@ -131,6 +131,7 @@ export default function AdminDeposits() {
               <label style={s.check}><input type="checkbox" checked={Boolean(verified[deposit.id])} onChange={e => setVerified(v => ({...v, [deposit.id]: e.target.checked}))} /><span>I independently verified that the payment was received in the destination account.</span></label>
               <div style={s.actions}><button disabled={activeId === deposit.id} style={s.approve} onClick={() => review(deposit, 'approve')}>{activeId === deposit.id ? 'Saving…' : 'Verify & credit wallet'}</button><button disabled={activeId === deposit.id} style={s.reject} onClick={() => review(deposit, 'reject')}>Reject request</button></div>
             </div>}
+            {deposit.metadata?.review && <div style={s.reviewHistory}><strong>Review history</strong><span>{deposit.metadata.review.action === 'approve' ? 'Approved' : 'Rejected'} · {deposit.metadata.review.reviewedAt ? new Date(deposit.metadata.review.reviewedAt).toLocaleString() : 'Timestamp unavailable'}</span><p>{deposit.metadata.review.note || 'No review note saved.'}</p><small>Reviewer ID: {deposit.metadata.review.adminId || 'Not recorded'}</small></div>}
             {!pending && <p style={s.closed}>This request has already been reviewed and cannot be processed again.</p>}
           </article>;
         })}
@@ -176,6 +177,7 @@ const s = {
   approve: { background: '#175437', color: '#fff', border: 0, borderRadius: 10, padding: '12px 15px', fontWeight: 800, flex: '1 1 190px' },
   reject: { background: '#fff', color: '#a13d36', border: '1px solid #f0cbc7', borderRadius: 10, padding: '12px 15px', fontWeight: 800, flex: '1 1 130px' },
   closed: { fontSize: 12, color: '#839087', marginBottom: 0 },
+  reviewHistory: { display: 'grid', gap: 7, marginTop: 16, padding: 14, borderRadius: 12, background: '#f7faf7', border: '1px solid #e2ebe4', fontSize: 12, color: '#52645a', overflowWrap: 'anywhere' },
   empty: { maxWidth: 1040, margin: '0 auto', background: '#fff', border: '1px dashed #dce6df', borderRadius: 16, padding: 32, textAlign: 'center', color: '#718078' },
   success: { maxWidth: 1040, margin: '0 auto 14px', background: '#e8f7ec', color: '#24633d', padding: 13, borderRadius: 10, fontSize: 13 },
   error: { maxWidth: 1040, margin: '0 auto 14px', background: '#fff0ed', color: '#9c3e36', padding: 13, borderRadius: 10, fontSize: 13 },
