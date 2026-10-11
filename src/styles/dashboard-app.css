@@ -37,6 +37,11 @@
     grid-template-columns: 1fr !important;
   }
 
+  .tm-market-strip {
+    grid-template-columns: 1.2fr repeat(3, minmax(0, 1fr)) !important;
+    overflow-x: auto;
+  }
+
   /* Bottom tab bar replaces the sidebar on small screens. */
   .tm-mobile-nav {
     display: flex !important;
@@ -80,6 +85,10 @@
 @media (max-width: 640px) {
   .tm-stats {
     grid-template-columns: 1fr !important;
+  }
+
+  .tm-market-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 
   .tm-topbar h1 {
