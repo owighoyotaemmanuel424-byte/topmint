@@ -95,7 +95,7 @@ export default function Notifications() {
 
   useEffect(() => {
     if (!router.isReady) return;
-    router.replace({ pathname: '/notifications', query: Object.fromEntries(new URLSearchParams(queryString)) }, undefined, { shallow: true });
+    router.replace({ pathname: '/dashboard/notifications', query: Object.fromEntries(new URLSearchParams(queryString)) }, undefined, { shallow: true });
   }, [queryString, router]);
 
   const apply = event => {

@@ -102,8 +102,8 @@ export default function Dashboard() {
         <Link style={s.navItem} href="/deposit"><span>＋</span> Add funds</Link>
         <Link style={s.navItem} href="/withdraw"><span>↗</span> Withdraw</Link>
         <Link style={s.navItem} href="/investments"><span>◫</span> Investments</Link>
-        <Link style={s.navItem} href="/transactions"><span>↔</span> Transactions</Link>
-        <Link style={s.navItem} href="/notifications"><span>♧</span> Notifications {unread > 0 && <b style={s.badge}>{unread}</b>}</Link>
+        <Link style={s.navItem} href="/dashboard/transactions"><span>↔</span> Transactions</Link>
+        <Link style={s.navItem} href="/dashboard/notifications"><span>♧</span> Notifications {unread > 0 && <b style={s.badge}>{unread}</b>}</Link>
         <div style={s.sidebarBottom}><Link style={s.navItem} href="/profile"><span>◎</span> My profile</Link><button onClick={logout} style={s.logout}>↪ Sign out</button><p style={s.secure}>● Secure customer portal</p></div>
       </aside>
       <section style={s.main} className="tm-main">
@@ -127,7 +127,7 @@ export default function Dashboard() {
         <section style={s.panel} className="tm-activity-chart">
           <div style={s.sectionHead}>
             <div><p style={s.kicker}>ACCOUNT SNAPSHOT</p><h2 style={s.sectionTitle}>Recent transaction activity</h2></div>
-            <button style={s.textLink} onClick={() => router.push('/transactions')}>History ↗</button>
+            <button style={s.textLink} onClick={() => router.push('/dashboard/transactions')}>History ↗</button>
           </div>
           {transactions.length ? (() => {
             const points = transactions.slice(0, 6).reverse();
@@ -161,7 +161,7 @@ export default function Dashboard() {
           })() : <p style={s.muted}>Your transaction activity chart will appear after your first transaction.</p>}
         </section>
         <div style={s.contentGrid} className="tm-content">
-          <section style={s.panel}><div style={s.sectionHead}><div><p style={s.kicker}>ACCOUNT ACTIVITY</p><h2 style={s.sectionTitle}>Recent transactions</h2></div><button style={s.textLink} onClick={() => router.push('/transactions')}>View all ↗</button></div>
+          <section style={s.panel}><div style={s.sectionHead}><div><p style={s.kicker}>ACCOUNT ACTIVITY</p><h2 style={s.sectionTitle}>Recent transactions</h2></div><button style={s.textLink} onClick={() => router.push('/dashboard/transactions')}>View all ↗</button></div>
             {transactions.length ? <div style={s.table}>{transactions.slice(0,6).map(t => <div key={t.id} style={s.transaction}><div style={s.txIcon}>{t.type === 'DEPOSIT' ? '↓' : t.type === 'WITHDRAWAL' ? '↑' : t.type === 'INVESTMENT' ? '◈' : '↔'}</div><div style={s.txInfo}><strong>{title(t.description || t.type)}</strong><small>{date(t.createdAt)} · {t.reference}</small></div><div style={s.txAmount}><strong>{money(t.amount, t.currency || currency)}</strong><small style={{color:t.status === 'COMPLETED' ? '#16805d' : t.status === 'FAILED' ? '#b42318' : '#9a6700'}}>{title(t.status)}</small></div></div>)}</div> : <div style={s.empty}><span>↔</span><strong>No transactions yet</strong><p>Your deposits, withdrawals and investments will appear here.</p><button style={s.primary} onClick={() => router.push('/deposit')}>Make your first deposit</button></div>}
           </section>
           <section style={s.panel}><div style={s.sectionHead}><div><p style={s.kicker}>GROW WITH A PLAN</p><h2 style={s.sectionTitle}>Investment options</h2></div><button style={s.textLink} onClick={() => router.push('/investments')}>Explore ↗</button></div>
@@ -169,12 +169,12 @@ export default function Dashboard() {
             <div style={s.noticeBox}><span>ⓘ</span><p>Review each plan&apos;s terms, risks, fees and withdrawal conditions before investing. Returns are not guaranteed unless explicitly stated in the applicable terms.</p></div>
           </section>
         </div>
-        <section style={s.panel}><div style={s.sectionHead}><div><p style={s.kicker}>STAY INFORMED</p><h2 style={s.sectionTitle}>Notifications {unread > 0 && <span style={s.unread}>{unread} new</span>}</h2></div><button style={s.textLink} onClick={() => router.push('/notifications')}>All notifications ↗</button></div>
+        <section style={s.panel}><div style={s.sectionHead}><div><p style={s.kicker}>STAY INFORMED</p><h2 style={s.sectionTitle}>Notifications {unread > 0 && <span style={s.unread}>{unread} new</span>}</h2></div><button style={s.textLink} onClick={() => router.push('/dashboard/notifications')}>All notifications ↗</button></div>
           {notifications.length ? notifications.slice(0,3).map(n => <div key={n.id} style={s.noticeRow}><span style={{...s.noticeDot,background:n.read?'#d1d5db':'#1c8b67'}}/><div style={{flex:1}}><strong>{n.title}</strong><p>{n.message}</p><small>{date(n.createdAt)}</small></div>{!n.read && <button style={s.textLink} onClick={() => markRead(n.id)}>Mark read</button>}</div>) : <p style={s.muted}>You&apos;re all caught up. New account updates will appear here.</p>}
         </section>
         <footer style={s.footer} className="tm-footer"><span>© {new Date().getFullYear()} TopMint</span><span>USD is the platform&apos;s primary currency for new wallets. Historical balances retain their recorded currency.</span></footer>
       </section>
-      <nav style={s.mobileNav} className="tm-mobile-nav"><Link href="/dashboard">⌂<small>Home</small></Link><Link href="/deposit">＋<small>Fund</small></Link><Link href="/investments">◫<small>Invest</small></Link><Link href="/transactions">↔<small>Activity</small></Link><Link href="/profile">◎<small>Profile</small></Link></nav>
+      <nav style={s.mobileNav} className="tm-mobile-nav"><Link href="/dashboard">⌂<small>Home</small></Link><Link href="/deposit">＋<small>Fund</small></Link><Link href="/investments">◫<small>Invest</small></Link><Link href="/dashboard/transactions">↔<small>Activity</small></Link><Link href="/profile">◎<small>Profile</small></Link></nav>
     </main>
   </>;
 }
