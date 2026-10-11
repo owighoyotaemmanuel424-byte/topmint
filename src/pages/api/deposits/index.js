@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
-      const rows = await prisma.deposit.findMany({ where: { userId: user.id }, orderBy: { createdAt: 'desc' }, take: 50 });
+      const rows = await prisma.deposit.findMany({ where: { userId: user.id }, orderBy: { createdAt: 'desc' }, take: 50, include: { transaction: { select: { id: true, reference: true, status: true, currency: true, createdAt: true } } } });
       return res.status(200).json({ deposits: rows.map(d => ({ ...d, amount: d.amount.toString() })) });
     } catch (error) {
       return respondWithError(res, error, {
