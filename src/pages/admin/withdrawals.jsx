@@ -14,6 +14,11 @@ const money = (value, currency = 'USD') => {
 export default function AdminWithdrawals() {
   const router = useRouter();
   const [status, setStatus] = useState('PENDING');
+  const [search, setSearch] = useState('');
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
   const [withdrawals, setWithdrawals] = useState([]);
   const [notes, setNotes] = useState({});
   const [payoutReferences, setPayoutReferences] = useState({});
@@ -26,16 +31,21 @@ export default function AdminWithdrawals() {
     setBusy(true);
     setError('');
     try {
-      const response = await requestJson('/api/admin/withdrawals?status=' + encodeURIComponent(status));
+      const params = new URLSearchParams({ status, page: String(page) });
+      if (search.trim()) params.set('search', search.trim());
+      if (from) params.set('from', from);
+      if (to) params.set('to', to);
+      const response = await requestJson('/api/admin/withdrawals?' + params.toString());
       if (!response.ok) throw new Error(apiErrorMessage(response, 'Unable to load withdrawals'));
       setWithdrawals(response.data.withdrawals || []);
+      setPagination(response.data.pagination || { page, pages: 1, total: (response.data.withdrawals || []).length });
     } catch (e) {
       setError(e.message || 'Unable to load withdrawals');
       if (/unauthorized|forbidden/i.test(e.message || '')) router.replace('/signin_admin');
     } finally {
       setBusy(false);
     }
-  }, [status, router]);
+  }, [status, search, from, to, page, router]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -105,6 +115,7 @@ export default function AdminWithdrawals() {
           </article>;
         })}
       </section>}
+      {!busy && pagination.pages > 1 && <div style={s.pagination}><span>Page {pagination.page} of {pagination.pages} · {pagination.total} requests</span><div style={s.actions}><button style={s.button} disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Previous</button><button style={s.button} disabled={page >= pagination.pages} onClick={() => setPage(p => Math.min(pagination.pages, p + 1))}>Next</button></div></div>}
       <footer style={s.footer}>TopMint · Withdrawal controls · Decisions are recorded in the audit log.</footer>
     </main>
   </>;
@@ -123,6 +134,7 @@ const s = {
   filter: { display: 'flex', flexDirection: 'column', gap: 7, color: '#63736a', fontSize: 12, fontWeight: 750 },
   select: { background: '#fff', border: '1px solid #dce6df', borderRadius: 10, padding: '11px 12px', color: '#183426', minWidth: 170 },
   list: { maxWidth: 1040, margin: '0 auto', display: 'grid', gap: 16 },
+  pagination: { maxWidth: 1040, margin: '20px auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', color: '#63736a', fontSize: 12 },
   card: { background: '#fff', border: '1px solid #e1e9e3', borderRadius: 18, padding: 'clamp(17px, 3vw, 26px)', boxShadow: '0 12px 34px #163c2608', minWidth: 0 },
   row: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 },
   ref: { fontSize: 15, overflowWrap: 'anywhere', margin: '6px 0 0' },
