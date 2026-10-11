@@ -44,7 +44,7 @@ export default async function handler(req, res) {
   try {
     const result = await withTransaction(async tx => {
       const existing = await tx.investment.findUnique({ where: { requestKey: parsed.data.idempotencyKey }, include: { plan: true } });
-      if (existing) { if (existing.userId !== user.id) throw new Error('Investment request key already used'); return { investment: existing, created: false }; }
+      if (existing) { if (existing.userId !== user.id || existing.planId !== parsed.data.planId || !existing.principal.equals(new Prisma.Decimal(parsed.data.amount))) throw new Error('Investment request key already used'); return { investment: existing, created: false }; }
       const plan = await tx.investmentPlan.findUnique({ where: { id: parsed.data.planId } });
       if (!plan || !plan.active) throw new Error('Investment plan unavailable');
       const amount = new Prisma.Decimal(parsed.data.amount);
@@ -91,6 +91,7 @@ export default async function handler(req, res) {
   } catch (error) {
     const message = publicErrorMessage(error, null);
     if (message) return res.status(400).json({ error: message });
+    if (error?.message === 'Investment request key already used') return res.status(409).json({ error: 'This idempotency key was already used for a different investment request.' });
     return respondWithError(res, error, {
       fallback: 'INVESTMENT_FAILED',
       message: 'Unable to start that investment right now. Please try again shortly.',
