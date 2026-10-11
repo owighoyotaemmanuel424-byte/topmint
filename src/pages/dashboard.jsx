@@ -111,9 +111,9 @@ export default function Dashboard() {
         {error && <div style={s.alert}><span>{error}</span><button style={s.linkButton} onClick={load}>Retry</button></div>}
         <section style={s.hero} className="tm-hero">
           <div style={s.heroGlow} />
-          <div style={s.heroContent}><p style={s.heroLabel}>TOTAL AVAILABLE BALANCE <span style={s.live}><i /> LIVE</span></p><h2 style={s.balance}>{money(wallet?.balance, currency)}</h2><p style={s.heroSub}>Your {currency} wallet balance</p><div style={s.heroActions}><button style={s.heroButton} onClick={() => router.push('/deposit')}>＋ Add funds</button><button style={s.heroOutline} onClick={() => router.push('/withdraw')}>Withdraw ↗</button></div></div>
+          <div style={s.heroContent}><p style={s.heroLabel}>TOTAL AVAILABLE BALANCE <span style={s.live}><i /> LIVE</span></p><h2 style={s.balance} className="tm-balance">{money(wallet?.balance, currency)}</h2><p style={s.heroSub}>Your {currency} wallet balance</p><div style={s.heroActions} className="tm-hero-actions"><button style={s.heroButton} onClick={() => router.push('/deposit')}>＋ Add funds</button><button style={s.heroOutline} onClick={() => router.push('/withdraw')}>Withdraw ↗</button></div></div>
           <div style={s.heroSymbol} className="tm-hero-symbol">$</div>
-          <div style={s.heroFooter}><span>WALLET STATUS</span><strong><i /> Active</strong><span style={{marginLeft:'auto'}}>MEMBER SINCE {date(user.createdAt)}</span></div>
+          <div style={s.heroFooter} className="tm-hero-footer"><span>WALLET STATUS</span><strong><i /> Active</strong><span style={{marginLeft:'auto'}}>MEMBER SINCE {date(user.createdAt)}</span></div>
         </section>
         <div style={s.statsGrid} className="tm-stats">
           <article style={s.statCard}><div style={s.statTop}><span style={s.statIcon}>↗</span><span style={s.statHint}>Portfolio</span></div><p style={s.statLabel}>Active investments</p><h3>{activeInvestments.length}</h3><p style={s.statFoot}>{money(invested, currency)} principal invested</p></article>
@@ -132,7 +132,7 @@ export default function Dashboard() {
         <section style={s.panel}><div style={s.sectionHead}><div><p style={s.kicker}>STAY INFORMED</p><h2 style={s.sectionTitle}>Notifications {unread > 0 && <span style={s.unread}>{unread} new</span>}</h2></div><button style={s.textLink} onClick={() => router.push('/notifications')}>All notifications ↗</button></div>
           {notifications.length ? notifications.slice(0,3).map(n => <div key={n.id} style={s.noticeRow}><span style={{...s.noticeDot,background:n.read?'#d1d5db':'#1c8b67'}}/><div style={{flex:1}}><strong>{n.title}</strong><p>{n.message}</p><small>{date(n.createdAt)}</small></div>{!n.read && <button style={s.textLink} onClick={() => markRead(n.id)}>Mark read</button>}</div>) : <p style={s.muted}>You&apos;re all caught up. New account updates will appear here.</p>}
         </section>
-        <footer style={s.footer}><span>© {new Date().getFullYear()} TopMint</span><span>USD is the platform&apos;s primary currency for new wallets. Historical balances retain their recorded currency.</span></footer>
+        <footer style={s.footer} className="tm-footer"><span>© {new Date().getFullYear()} TopMint</span><span>USD is the platform&apos;s primary currency for new wallets. Historical balances retain their recorded currency.</span></footer>
       </section>
       <nav style={s.mobileNav} className="tm-mobile-nav"><Link href="/dashboard">⌂<small>Home</small></Link><Link href="/deposit">＋<small>Fund</small></Link><Link href="/investments">◫<small>Invest</small></Link><Link href="/transactions">↔<small>Activity</small></Link><Link href="/profile">◎<small>Profile</small></Link></nav>
     </main>
