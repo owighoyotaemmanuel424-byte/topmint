@@ -1,5 +1,5 @@
 import { prisma } from './db/prisma';
-import { verifyAuthToken, verifyAdminToken } from './auth';
+import { verifyAuthClaims, verifyAdminToken } from './auth';
 
 function getCookie(req, name) {
   const header = req.headers.cookie || '';
@@ -9,11 +9,12 @@ function getCookie(req, name) {
 
 export async function getAuthenticatedUser(req) {
   const token = getCookie(req, 'token');
-  const id = await verifyAuthToken(token);
-  if (!id) return null;
-  // Only active accounts may act on authenticated endpoints. Without this check a
-  // suspended user with an unexpired token could still deposit, withdraw and invest.
-  return prisma.user.findFirst({ where: { id, status: 'ACTIVE' } });
+  const claims = await verifyAuthClaims(token);
+  if (!claims) return null;
+  // Session-version checks revoke all older customer JWTs after password reset/change.
+  const user = await prisma.user.findFirst({ where: { id: claims.sub, status: 'ACTIVE' } });
+  if (!user || Number(claims.sv || 0) !== user.sessionVersion) return null;
+  return user;
 }
 
 export async function getAuthenticatedAdmin(req) {
