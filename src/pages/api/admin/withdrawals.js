@@ -56,17 +56,37 @@ export default async function handler(req, res) {
     if (!admin) return;
 
     if (req.method === 'GET') {
-      const status = STATUSES.includes(req.query.status) ? req.query.status : 'PENDING';
-      const rows = await prisma.withdrawal.findMany({
-        where: { status },
+      const status = typeof req.query.status === 'string' && STATUSES.includes(req.query.status) ? req.query.status : 'PENDING';
+      const search = typeof req.query.search === 'string' ? req.query.search.trim().slice(0, 160) : '';
+      const from = typeof req.query.from === 'string' && /^\\d{4}-\\d{2}-\\d{2}$/.test(req.query.from) ? new Date(req.query.from + 'T00:00:00.000Z') : null;
+      const to = typeof req.query.to === 'string' && /^\\d{4}-\\d{2}-\\d{2}$/.test(req.query.to) ? new Date(req.query.to + 'T23:59:59.999Z') : null;
+      if ((from && Number.isNaN(from.getTime())) || (to && Number.isNaN(to.getTime())) || (from && to && from > to)) return res.status(400).json({ error: 'Invalid withdrawal date range.' });
+      const page = Math.max(1, Math.min(100000, Number.parseInt(String(req.query.page || '1'), 10) || 1));
+      const where = {
+        ...(status === 'ALL' ? {} : { status }),
+        ...((from || to) ? { createdAt: { ...(from ? { gte: from } : {}), ...(to ? { lte: to } : {}) } } : {}),
+        ...(search ? { OR: [
+          { transaction: { reference: { contains: search, mode: 'insensitive' } } },
+          { user: { email: { contains: search, mode: 'insensitive' } } },
+          { user: { firstName: { contains: search, mode: 'insensitive' } } },
+          { user: { lastName: { contains: search, mode: 'insensitive' } } },
+        ] } : {}),
+      };
+      const take = 25;
+      const [rows, total] = await Promise.all([
+        prisma.withdrawal.findMany({
+        where,
         orderBy: { createdAt: 'asc' },
-        take: 100,
+        skip: (page - 1) * take,
+        take,
         include: {
           transaction: { select: { reference: true, currency: true, status: true, metadata: true } },
           user: { select: { id: true, email: true, firstName: true, lastName: true } },
         },
-      });
-      return res.status(200).json({ withdrawals: rows.map(serialize), status });
+      }),
+        prisma.withdrawal.count({ where }),
+      ]);
+      return res.status(200).json({ withdrawals: rows.map(serialize), status, pagination: { page, pageSize: take, total, pages: Math.max(1, Math.ceil(total / take)) } });
     }
 
     if (!REVIEWER_ROLES.includes(admin.role)) {
