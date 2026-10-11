@@ -16,6 +16,7 @@ export default function AdminWithdrawals() {
   const [status, setStatus] = useState('PENDING');
   const [withdrawals, setWithdrawals] = useState([]);
   const [notes, setNotes] = useState({});
+  const [payoutReferences, setPayoutReferences] = useState({});
   const [busy, setBusy] = useState(true);
   const [activeId, setActiveId] = useState('');
   const [error, setError] = useState('');
@@ -40,10 +41,14 @@ export default function AdminWithdrawals() {
 
   const review = async (row, action) => {
     const note = (notes[row.id] || '').trim();
+    const payoutReference = (payoutReferences[row.id] || '').trim();
     if (note.length < 5) return setError('Enter a review note of at least 5 characters.');
+    if (action === 'paid' && payoutReference.length < 3) return setError('Enter the confirmed bank/provider payout reference.');
     const question = action === 'approve'
-      ? 'Approve this withdrawal for payout? This does not itself transfer money to the bank.'
-      : 'Reject this withdrawal and return the reserved amount to the customer wallet?';
+      ? 'Approve this withdrawal for manual payout? This does not mark it paid.'
+      : action === 'paid'
+        ? 'Confirm that the transfer is completed and the payout reference is verified?'
+        : 'Reject this withdrawal and return the reserved amount to the customer wallet?';
     if (!window.confirm(question)) return;
     setActiveId(row.id);
     setError('');
@@ -52,11 +57,12 @@ export default function AdminWithdrawals() {
       const response = await requestJson('/api/admin/withdrawals/' + encodeURIComponent(row.id), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, note }),
+        body: JSON.stringify({ action, note, payoutReference }),
       });
       if (!response.ok) throw new Error(apiErrorMessage(response, 'Withdrawal review failed'));
       setMessage(response.data.message || 'Withdrawal review saved.');
       setNotes(current => ({ ...current, [row.id]: '' }));
+      setPayoutReferences(current => ({ ...current, [row.id]: '' }));
       await load();
     } catch (e) {
       setError(e.message || 'Withdrawal review failed');
@@ -78,19 +84,24 @@ export default function AdminWithdrawals() {
         <div><Link href="/dashboard_admin" style={s.back}>← Dashboard</Link><p style={s.eyebrow}>TOPMINT OPERATIONS</p><h1 style={s.title}>Withdrawal operations</h1><p style={s.subtitle}>Review withdrawal requests, record decisions, and keep customer wallet balances consistent.</p></div>
         <button style={s.button} onClick={logout}>Sign out</button>
       </header>
-      <section style={s.notice}><strong>Important payout control</strong><span>Approval records that a request is approved for payout; it does not transfer funds automatically. Complete the bank transfer separately. Rejection returns the reserved withdrawal amount to the customer&apos;s wallet and is recorded in the audit log.</span></section>
-      <div style={s.toolbar}><label style={s.filter}>Show requests<select style={s.select} value={status} onChange={e => setStatus(e.target.value)}><option value="PENDING">Pending review</option><option value="COMPLETED">Approved</option><option value="FAILED">Rejected</option><option value="ALL">All statuses</option></select></label><button style={s.button} disabled={busy} onClick={load}>{busy ? 'Loading…' : 'Refresh'}</button></div>
+      <section style={s.notice}><strong>Important payout control</strong><span>Approval only moves a request into processing; it does not mark it paid. Complete the bank transfer separately, verify the payout reference, then record the payout. Rejection releases the reserved amount once and is audit logged.</span></section>
+      <div style={s.toolbar}><label style={s.filter}>Show requests<select style={s.select} value={status} onChange={e => setStatus(e.target.value)}><option value="PENDING">Pending review</option><option value="COMPLETED">Approved</option><option value="PROCESSING">Approved / processing</option><option value="FAILED">Rejected / failed</option><option value="COMPLETED">Paid</option><option value="ALL">All statuses</option></select></label><button style={s.button} disabled={busy} onClick={load}>{busy ? 'Loading…' : 'Refresh'}</button></div>
       {message && <p role="status" style={s.success}>{message}</p>}
       {error && <p role="alert" style={s.error}>{error}</p>}
       {busy ? <div style={s.empty}>Loading withdrawal requests…</div> : withdrawals.length === 0 ? <div style={s.empty}><strong>No withdrawals found</strong><p>No requests match this status filter.</p></div> : <section style={s.list}>
         {withdrawals.map(row => {
           const pending = row.status === 'PENDING' && row.transaction?.status === 'PROCESSING';
+          const processing = row.status === 'PROCESSING' && row.transaction?.status === 'PROCESSING' && Boolean(row.transaction?.metadata?.adminReview?.approvedAt);
           const customer = [row.user?.firstName, row.user?.lastName].filter(Boolean).join(' ');
           return <article key={row.id} style={s.card}>
-            <div style={s.row}><div><small style={s.eyebrow}>TRANSACTION REFERENCE</small><h2 style={s.ref}>{row.transaction?.reference || row.id}</h2><p style={s.date}>{new Date(row.createdAt).toLocaleString()}</p></div><span style={{...s.badge, ...(row.status === 'COMPLETED' ? s.done : row.status === 'PENDING' ? s.pending : s.failed)}}>{row.status}</span></div>
+            <div style={s.row}><div><small style={s.eyebrow}>TRANSACTION REFERENCE</small><h2 style={s.ref}>{row.transaction?.reference || row.id}</h2><p style={s.date}>{new Date(row.createdAt).toLocaleString()}</p></div><span style={{...s.badge, ...(row.status === 'COMPLETED' ? s.done : row.status === 'PENDING' ? s.pending : row.status === 'PROCESSING' ? s.processing : s.failed)}}>{row.status === 'COMPLETED' ? 'PAID' : row.status === 'PROCESSING' && processing ? 'APPROVED / PROCESSING' : row.status}</span></div>
             <div style={s.amount}>{money(row.amount, row.transaction?.currency || 'USD')}</div>
             <div style={s.details}><div><span>Customer</span><strong>{customer || 'TopMint customer'}</strong><small>{row.user?.email || '—'}</small></div><div><span>Bank</span><strong>{row.bankName || '—'}</strong></div><div><span>Account name</span><strong>{row.accountName || '—'}</strong></div><div><span>Account number</span><strong>{row.accountNumber || '—'}</strong></div><div><span>Fee</span><strong>{money(row.fee, row.transaction?.currency || 'USD')}</strong></div></div>
-            {pending ? <div style={s.review}><label style={s.label}>Review note (required)<textarea style={s.textarea} value={notes[row.id] || ''} onChange={e => setNotes(v => ({...v, [row.id]: e.target.value}))} placeholder="Record payout confirmation or the reason for rejection." minLength={5} maxLength={500}/></label><div style={s.actions}><button style={s.approve} disabled={activeId === row.id} onClick={() => review(row, 'approve')}>{activeId === row.id ? 'Saving…' : 'Approve for payout'}</button><button style={s.reject} disabled={activeId === row.id} onClick={() => review(row, 'reject')}>Reject & refund</button></div></div> : <p style={s.closed}>This request has already been reviewed and cannot be processed again.</p>}
+            {(pending || processing) ? <div style={s.review}>
+              <label style={s.label}>{processing ? 'Payout confirmation note (required)' : 'Review note (required)'}<textarea style={s.textarea} value={notes[row.id] || ''} onChange={e => setNotes(v => ({...v, [row.id]: e.target.value}))} placeholder={processing ? 'Record how payout completion was verified.' : 'Record the review decision and evidence.'} minLength={5} maxLength={500}/></label>
+              {processing && <label style={s.label}>Confirmed bank / provider payout reference<input style={s.textarea} value={payoutReferences[row.id] || ''} onChange={e => setPayoutReferences(v => ({...v, [row.id]: e.target.value}))} placeholder="Reference from the completed transfer" maxLength={160}/></label>}
+              <div style={s.actions}>{pending && <><button style={s.approve} disabled={activeId === row.id} onClick={() => review(row, 'approve')}>{activeId === row.id ? 'Saving…' : 'Approve for payout'}</button><button style={s.reject} disabled={activeId === row.id} onClick={() => review(row, 'reject')}>Reject & refund</button></>}{processing && <><button style={s.approve} disabled={activeId === row.id} onClick={() => review(row, 'paid')}>{activeId === row.id ? 'Saving…' : 'Confirm payout paid'}</button><button style={s.reject} disabled={activeId === row.id} onClick={() => review(row, 'reject')}>Reject & refund</button></>}</div>
+            </div> : <p style={s.closed}>{row.status === 'COMPLETED' ? 'Payout recorded as paid. Check the audit history for the payout reference.' : 'This request has already been resolved and cannot be processed again.'}</p>}
           </article>;
         })}
       </section>}
@@ -119,6 +130,7 @@ const s = {
   badge: { fontSize: 9, fontWeight: 850, letterSpacing: 0.7, padding: '7px 9px', borderRadius: 99, flexShrink: 0 },
   pending: { color: '#865a10', background: '#fff1cd' },
   done: { color: '#21633d', background: '#e4f6e9' },
+  processing: { color: '#315ea8', background: '#e8efff' },
   failed: { color: '#973c35', background: '#ffebe8' },
   amount: { fontSize: 28, fontWeight: 850, letterSpacing: -0.7, margin: '18px 0' },
   details: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, padding: '16px 0', borderTop: '1px solid #edf1ed', borderBottom: '1px solid #edf1ed' },
