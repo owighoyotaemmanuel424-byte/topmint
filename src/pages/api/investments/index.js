@@ -51,7 +51,7 @@ export default async function handler(req, res) {
       if (!amount.isFinite() || amount.lessThanOrEqualTo(0)) throw new Error('Invalid amount');
       if (amount.lessThan(plan.minimumAmount) || (plan.maximumAmount !== null && amount.greaterThan(plan.maximumAmount))) throw new Error('Amount is outside this plan range');
 
-      const reference = 'INV-' + crypto.randomBytes(10).toString('hex').toUpperCase();
+      const reference = 'INV-' + crypto.randomBytes(12).toString('hex').toUpperCase();
       const transaction = await debitWallet(tx, {
         userId: user.id,
         amount,
@@ -64,7 +64,6 @@ export default async function handler(req, res) {
       if (!['SIMPLE_FIXED', 'PRINCIPAL_ONLY'].includes(plan.calculationMethod)) throw new Error('Investment plan unavailable');
       const startedAt = new Date();
       const maturityAt = new Date(startedAt.getTime() + plan.durationDays * 86400000);
-      const reference = 'INV-' + crypto.randomBytes(12).toString('hex').toUpperCase();
       const termsSnapshot = { planId: plan.id, planName: plan.name, description: plan.description, minimumAmount: plan.minimumAmount.toString(), maximumAmount: plan.maximumAmount?.toString() ?? null, durationDays: plan.durationDays, returnRate: plan.returnRate.toString(), calculationMethod: plan.calculationMethod, payoutSchedule: plan.payoutSchedule, maturityConditions: plan.maturityConditions, riskDisclosure: plan.riskDisclosure, feeRate: plan.feeRate.toString(), termsVersion: plan.termsVersion, currency: 'USD', capturedAt: startedAt.toISOString() };
       const investment = await tx.investment.create({
         data: { userId: user.id, planId: plan.id, principal: amount, expectedReturn, actualReturn: new Prisma.Decimal(0), accruedEarnings: new Prisma.Decimal(0), paidEarnings: new Prisma.Decimal(0), status: 'ACTIVE', startedAt, maturityAt, reference, requestKey: parsed.data.idempotencyKey, termsSnapshot }
