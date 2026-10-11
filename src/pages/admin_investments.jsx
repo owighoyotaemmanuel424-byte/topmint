@@ -1,6 +1,6 @@
 import {useCallback,useEffect,useState} from 'react';
 import Head from 'next/head';import Link from 'next/link';import {useRouter} from 'next/router';
-import {requestJson,apiErrorMessage} from '../../lib/api-client';
+import {requestJson,apiErrorMessage} from '../lib/api-client';
 const cash=v=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(v||0));
 export default function AdminInvestments(){
  const router=useRouter();const [items,setItems]=useState([]),[status,setStatus]=useState('ALL'),[search,setSearch]=useState(''),[loading,setLoading]=useState(true),[error,setError]=useState(''),[page,setPage]=useState(1),[total,setTotal]=useState(0);
