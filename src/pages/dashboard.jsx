@@ -120,6 +120,42 @@ export default function Dashboard() {
           <article style={s.statCard}><div style={s.statTop}><span style={{...s.statIcon,background:'#f1edff',color:'#7557c7'}}>◷</span><span style={s.statHint}>In progress</span></div><p style={s.statLabel}>Pending transactions</p><h3>{transactions.filter(t => ['PENDING','PROCESSING'].includes(t.status)).length}</h3><p style={s.statFoot}>Awaiting completion</p></article>
           <article style={s.statCard}><div style={s.statTop}><span style={{...s.statIcon,background:'#fff3e7',color:'#a65c16'}}>▤</span><span style={s.statHint}>Explore</span></div><p style={s.statLabel}>Available plans</p><h3>{plans.length}</h3><p style={s.statFoot}>Options available to you</p></article>
         </div>
+        <section style={s.panel} className="tm-activity-chart">
+          <div style={s.sectionHead}>
+            <div><p style={s.kicker}>ACCOUNT SNAPSHOT</p><h2 style={s.sectionTitle}>Recent transaction activity</h2></div>
+            <button style={s.textLink} onClick={() => router.push('/transactions')}>History ↗</button>
+          </div>
+          {transactions.length ? (() => {
+            const points = transactions.slice(0, 6).reverse();
+            const amounts = points.map(item => Math.abs(Number(item.amount) || 0));
+            const maxAmount = Math.max(...amounts, 1);
+            const coords = amounts.map((amount, index) => {
+              const x = points.length < 2 ? 50 : 8 + index * (84 / (points.length - 1));
+              const y = 68 - (amount / maxAmount) * 48;
+              return { x, y, amount, item: points[index] };
+            });
+            const line = coords.map(point => `${point.x},${point.y}`).join(' ');
+            const area = `8,76 ${line} 92,76`;
+            return <div>
+              <div style={{width:'100%',overflow:'hidden'}}>
+                <svg viewBox="0 0 100 82" role="img" aria-label="Relative amounts of your six most recent transactions" style={{display:'block',width:'100%',height:140,overflow:'visible'}}>
+                  <defs><linearGradient id="tmActivityFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="#65efbd" stopOpacity=".28"/><stop offset="100%" stopColor="#65efbd" stopOpacity="0"/></linearGradient></defs>
+                  {[20,40,60].map(y => <line key={y} x1="4" x2="96" y1={y} y2={y} stroke="rgba(160,187,237,.14)" strokeWidth=".5" strokeDasharray="2 2" />)}
+                  <polygon points={area} fill="url(#tmActivityFill)" />
+                  {coords.length > 1 && <polyline points={line} fill="none" stroke="#65efbd" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />}
+                  {coords.map((point,index) => <circle key={point.item.id || index} cx={point.x} cy={point.y} r="1.8" fill="#65efbd" stroke="#101b34" strokeWidth=".8"><title>{title(point.item.type)}: {money(point.amount, point.item.currency || currency)}</title></circle>)}
+                </svg>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(3,minmax(0,1fr))',gap:8,marginTop:4}}>
+                {coords.slice(-3).map((point,index) => <div key={point.item.id || index} style={{minWidth:0,background:'rgba(160,187,237,.07)',border:'1px solid rgba(160,187,237,.12)',borderRadius:10,padding:'10px 11px'}}>
+                  <small style={{display:'block',fontSize:10,color:'#9eacc7',marginBottom:5,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{title(point.item.type)}</small>
+                  <strong style={{display:'block',fontSize:12,color:'#f4f7ff',overflowWrap:'anywhere'}}>{money(point.amount, point.item.currency || currency)}</strong>
+                </div>)}
+              </div>
+              <p style={{fontSize:10,color:'#9eacc7',lineHeight:1.5,margin:'12px 0 0'}}>Shows relative amounts from recent transactions, not investment performance or portfolio returns.</p>
+            </div>;
+          })() : <p style={s.muted}>Your transaction activity chart will appear after your first transaction.</p>}
+        </section>
         <div style={s.contentGrid} className="tm-content">
           <section style={s.panel}><div style={s.sectionHead}><div><p style={s.kicker}>ACCOUNT ACTIVITY</p><h2 style={s.sectionTitle}>Recent transactions</h2></div><button style={s.textLink} onClick={() => router.push('/transactions')}>View all ↗</button></div>
             {transactions.length ? <div style={s.table}>{transactions.slice(0,6).map(t => <div key={t.id} style={s.transaction}><div style={s.txIcon}>{t.type === 'DEPOSIT' ? '↓' : t.type === 'WITHDRAWAL' ? '↑' : t.type === 'INVESTMENT' ? '◈' : '↔'}</div><div style={s.txInfo}><strong>{title(t.description || t.type)}</strong><small>{date(t.createdAt)} · {t.reference}</small></div><div style={s.txAmount}><strong>{money(t.amount, t.currency || currency)}</strong><small style={{color:t.status === 'COMPLETED' ? '#16805d' : t.status === 'FAILED' ? '#b42318' : '#9a6700'}}>{title(t.status)}</small></div></div>)}</div> : <div style={s.empty}><span>↔</span><strong>No transactions yet</strong><p>Your deposits, withdrawals and investments will appear here.</p><button style={s.primary} onClick={() => router.push('/deposit')}>Make your first deposit</button></div>}
