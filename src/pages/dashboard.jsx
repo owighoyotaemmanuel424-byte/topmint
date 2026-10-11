@@ -221,7 +221,7 @@ export default function Dashboard() {
         .tm-content { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; }
         .tm-main .tm-footer { flex-direction: column; gap: 7px; line-height: 1.5; }
         .tm-main .tm-footer span:last-child { overflow-wrap: anywhere; }
-        .tm-mobile-nav { display: flex !important; position: fixed !important; z-index: 100 !important; left: 12px !important; right: 12px !important; bottom: calc(10px + env(safe-area-inset-bottom)) !important; min-height: 64px; align-items: center; justify-content: space-around; gap: 4px; padding: 7px 5px !important; border: 1px solid rgba(15, 55, 40, .12); border-radius: 18px; background: rgba(255,255,255,.96); box-shadow: 0 10px 32px rgba(13,48,38,.18); backdrop-filter: blur(18px); }
+        .tm-mobile-nav { display: flex !important; position: fixed !important; z-index: 100 !important; left: 12px !important; right: 12px !important; bottom: calc(12px + env(safe-area-inset-bottom)) !important; min-height: 62px; align-items: center; justify-content: space-around; gap: 4px; padding: 7px 5px !important; border: 1px solid rgba(15, 55, 40, .12); border-radius: 18px; background: rgba(255,255,255,.98); box-shadow: 0 10px 32px rgba(13,48,38,.18); backdrop-filter: blur(18px); }
         .tm-mobile-nav a { display: flex !important; flex: 1; min-width: 0; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 4px 1px; color: #426052; text-decoration: none; font-size: 20px; line-height: 1; border-radius: 10px; }
         .tm-mobile-nav a:first-child { color: #176342; background: #edf7e8; }
         .tm-mobile-nav a small { font-size: 9px; font-weight: 700; letter-spacing: .1px; }
