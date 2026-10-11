@@ -17,12 +17,12 @@ export async function getServerSideProps(context) {
 const SECTIONS = [
   { url: '/api/auth/me', label: 'your account' },
   { url: '/api/wallet', label: 'your wallet' },
-  { url: '/api/dashboard/transactions?limit=6', label: 'your transactions' },
+  { url: '/api/transactions?limit=6', label: 'your transactions' },
   { url: '/api/investments', label: 'your investments' },
   { url: '/api/investments/plans', label: 'available plans' },
   // Only the three most recent notifications are needed here; the unread total
   // comes back from the same response and is counted in the database.
-  { url: '/api/dashboard/notifications?pageSize=3', label: 'your notifications' },
+  { url: '/api/notifications?pageSize=3', label: 'your notifications' },
 ];
 
 const money = (value, currency = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value || 0));
@@ -77,7 +77,7 @@ export default function Dashboard() {
     router.replace('/signin');
   };
   const markRead = async id => {
-    const result = await requestJson(`/api/dashboard/notifications/${encodeURIComponent(id)}`, { method: 'PATCH' });
+    const result = await requestJson(`/api/notifications/${encodeURIComponent(id)}`, { method: 'PATCH' });
     if (!result.ok) return;
     setNotifications(items => items.map(item => (item.id === id ? { ...item, read: true } : item)));
     // The API returns the authoritative unread total for the whole account.
