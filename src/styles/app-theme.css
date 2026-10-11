@@ -1,0 +1,146 @@
+/* TopMint shared application theme — coordinated with the public landing page.
+   Landing-page colors: midnight navy, electric blue, and warm gold. */
+:root {
+  --tm-landing-bg: #000613;
+  --tm-landing-surface: #070e1e;
+  --tm-landing-surface-raised: #0b1830;
+  --tm-landing-blue: #0672CD;
+  --tm-landing-gold: #D8A31A;
+  --tm-landing-text: #F5F9FF;
+  --tm-landing-muted: #a8b7ca;
+  --tm-landing-border: rgba(185, 223, 255, .16);
+  --tm-landing-gradient: linear-gradient(120deg, #0672CD, #D8A31A);
+}
+.topmint-app-shell { background: var(--tm-landing-bg); color: var(--tm-landing-text); min-height: 100vh; }
+.topmint-app-shell > main:not(.home-page-root) {
+  background: var(--tm-landing-bg) !important;
+  color: var(--tm-landing-text) !important;
+  font-family: Inter, Montserrat, Arial, sans-serif !important;
+}
+.topmint-app-shell > main:not(.home-page-root) h1,
+.topmint-app-shell > main:not(.home-page-root) h2,
+.topmint-app-shell > main:not(.home-page-root) h3,
+.topmint-app-shell > main:not(.home-page-root) h4,
+.topmint-app-shell > main:not(.home-page-root) p,
+.topmint-app-shell > main:not(.home-page-root) label,
+.topmint-app-shell > main:not(.home-page-root) strong,
+.topmint-app-shell > main:not(.home-page-root) small,
+.topmint-app-shell > main:not(.home-page-root) span,
+.topmint-app-shell > main:not(.home-page-root) th,
+.topmint-app-shell > main:not(.home-page-root) td {
+  font-family: Inter, Montserrat, Arial, sans-serif !important;
+}
+.topmint-app-shell > main:not(.home-page-root) a { color: #b9dfff; }
+.topmint-app-shell > main:not(.home-page-root) a:hover { color: #D8A31A; }
+.topmint-app-shell > main:not(.home-page-root) section,
+.topmint-app-shell > main:not(.home-page-root) article,
+.topmint-app-shell > main:not(.home-page-root) [class*="card"],
+.topmint-app-shell > main:not(.home-page-root) [class*="panel"],
+.topmint-app-shell > main:not(.home-page-root) [class*="Panel"] {
+  background-color: var(--tm-landing-surface) !important;
+  color: var(--tm-landing-text) !important;
+  border-color: var(--tm-landing-border) !important;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, .18) !important;
+}
+.topmint-app-shell > main:not(.home-page-root) [class*="muted"],
+.topmint-app-shell > main:not(.home-page-root) [class*="subtitle"],
+.topmint-app-shell > main:not(.home-page-root) [class*="sub"],
+.topmint-app-shell > main:not(.home-page-root) [class*="kicker"],
+.topmint-app-shell > main:not(.home-page-root) [class*="eyebrow"],
+.topmint-app-shell > main:not(.home-page-root) [class*="date"],
+.topmint-app-shell > main:not(.home-page-root) [class*="hint"],
+.topmint-app-shell > main:not(.home-page-root) [class*="Foot"] {
+  color: var(--tm-landing-muted) !important;
+}
+.topmint-app-shell > main:not(.home-page-root) button,
+.topmint-app-shell > main:not(.home-page-root) input[type="submit"] {
+  border-radius: 10px;
+  font-family: Inter, Montserrat, Arial, sans-serif !important;
+  transition: transform .16s ease, filter .16s ease, border-color .16s ease;
+}
+.topmint-app-shell > main:not(.home-page-root) button:hover,
+.topmint-app-shell > main:not(.home-page-root) input[type="submit"]:hover { filter: brightness(1.12); }
+.topmint-app-shell > main:not(.home-page-root) button:focus-visible,
+.topmint-app-shell > main:not(.home-page-root) input:focus-visible,
+.topmint-app-shell > main:not(.home-page-root) select:focus-visible,
+.topmint-app-shell > main:not(.home-page-root) textarea:focus-visible {
+  outline: 2px solid var(--tm-landing-gold) !important;
+  outline-offset: 2px;
+}
+.topmint-app-shell > main:not(.home-page-root) input:not([type="checkbox"]):not([type="radio"]),
+.topmint-app-shell > main:not(.home-page-root) select,
+.topmint-app-shell > main:not(.home-page-root) textarea {
+  background: #020b1a !important;
+  color: var(--tm-landing-text) !important;
+  border-color: var(--tm-landing-border) !important;
+}
+.topmint-app-shell > main:not(.home-page-root) input::placeholder,
+.topmint-app-shell > main:not(.home-page-root) textarea::placeholder { color: #8193aa !important; }
+.topmint-app-shell > main:not(.home-page-root) table,
+.topmint-app-shell > main:not(.home-page-root) th,
+.topmint-app-shell > main:not(.home-page-root) td { border-color: var(--tm-landing-border) !important; }
+.topmint-app-shell > main:not(.home-page-root) [class*="primary"],
+.topmint-app-shell > main:not(.home-page-root) [class*="Primary"],
+.topmint-app-shell > main:not(.home-page-root) [class*="approve"],
+.topmint-app-shell > main:not(.home-page-root) [class*="Approve"],
+.topmint-app-shell > main:not(.home-page-root) [class*="heroButton"],
+.topmint-app-shell > main:not(.home-page-root) [class*="primaryButton"] {
+  background: var(--tm-landing-gradient) !important;
+  color: #fff !important;
+  border: 0 !important;
+}
+.topmint-app-shell > main:not(.home-page-root) [class*="hero"] {
+  border-color: var(--tm-landing-border) !important;
+}
+.topmint-app-shell > main:not(.home-page-root) .tm-side {
+  background: var(--tm-landing-surface) !important;
+  border: 1px solid var(--tm-landing-border) !important;
+}
+.topmint-app-shell > main:not(.home-page-root) .tm-side a,
+.topmint-app-shell > main:not(.home-page-root) .tm-side button { color: var(--tm-landing-text) !important; }
+.topmint-app-shell > main:not(.home-page-root) .tm-side .tm-nav-active,
+.topmint-app-shell > main:not(.home-page-root) .tm-side a[aria-current="page"] {
+  background: linear-gradient(100deg, rgba(6,114,205,.24), rgba(216,163,26,.12)) !important;
+  border: 1px solid rgba(6,114,205,.35) !important;
+}
+.topmint-app-shell > main:not(.home-page-root) .tm-hero {
+  background: linear-gradient(125deg, #071a35 0%, #073e70 60%, #614916 140%) !important;
+  border: 1px solid rgba(185,223,255,.2) !important;
+}
+.topmint-app-shell > main:not(.home-page-root) .tm-mobile-nav {
+  background: #070e1e !important;
+  border-color: var(--tm-landing-border) !important;
+}
+.topmint-app-shell > main:not(.home-page-root) .tm-mobile-nav a { color: #b9dfff !important; }
+.topmint-app-shell > main:not(.home-page-root) .tm-mobile-nav a:first-of-type { color: #D8A31A !important; }
+
+/* Sign-in and registration pages use the same dark/blue/gold system. */
+.topmint-app-shell > .signupCntn {
+  background: var(--tm-landing-bg) !important;
+  color: var(--tm-landing-text) !important;
+  font-family: Inter, Montserrat, Arial, sans-serif !important;
+}
+.topmint-app-shell > .signupCntn .righside,
+.topmint-app-shell > .signupCntn .righside form {
+  background: var(--tm-landing-surface) !important;
+  color: var(--tm-landing-text) !important;
+}
+.topmint-app-shell > .signupCntn .righside h1,
+.topmint-app-shell > .signupCntn .righside p,
+.topmint-app-shell > .signupCntn .righside label { color: var(--tm-landing-text) !important; }
+.topmint-app-shell > .signupCntn input {
+  background: #020b1a !important;
+  color: var(--tm-landing-text) !important;
+  border-color: var(--tm-landing-border) !important;
+}
+.topmint-app-shell > .signupCntn .fancyBtn,
+.topmint-app-shell > .signupCntn button[type="submit"] {
+  background: var(--tm-landing-gradient) !important;
+  color: #fff !important;
+  border: 0 !important;
+}
+@media (max-width: 640px) {
+  .topmint-app-shell > main:not(.home-page-root) { padding-left: 16px !important; padding-right: 16px !important; }
+  .topmint-app-shell > main:not(.home-page-root) header { gap: 12px !important; }
+  .topmint-app-shell > main:not(.home-page-root) button { max-width: 100%; }
+}
