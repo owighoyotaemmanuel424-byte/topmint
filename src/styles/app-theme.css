@@ -135,6 +135,29 @@
 .topmint-app-shell > main:not(.home-page-root) .tm-mobile-nav a { color: #b9dfff !important; }
 .topmint-app-shell > main:not(.home-page-root) .tm-mobile-nav a:first-of-type { color: #D8A31A !important; }
 
+/* Also cover legacy pages whose component root is a div rather than a main. */
+.topmint-app-shell > div:not(.HomefirstPageCtn):not(#absWa) {
+  background-color: var(--tm-landing-bg);
+  color: var(--tm-landing-text);
+  font-family: Inter, Montserrat, Arial, sans-serif;
+}
+.topmint-app-shell > div:not(.HomefirstPageCtn):not(#absWa) h1,
+.topmint-app-shell > div:not(.HomefirstPageCtn):not(#absWa) h2,
+.topmint-app-shell > div:not(.HomefirstPageCtn):not(#absWa) h3,
+.topmint-app-shell > div:not(.HomefirstPageCtn):not(#absWa) p,
+.topmint-app-shell > div:not(.HomefirstPageCtn):not(#absWa) label,
+.topmint-app-shell > div:not(.HomefirstPageCtn):not(#absWa) strong,
+.topmint-app-shell > div:not(.HomefirstPageCtn):not(#absWa) small {
+  color: var(--tm-landing-text);
+}
+.topmint-app-shell > div:not(.HomefirstPageCtn):not(#absWa) input,
+.topmint-app-shell > div:not(.HomefirstPageCtn):not(#absWa) select,
+.topmint-app-shell > div:not(.HomefirstPageCtn):not(#absWa) textarea {
+  background: #020b1a;
+  color: var(--tm-landing-text);
+  border-color: var(--tm-landing-border);
+}
+
 /* Sign-in and registration pages use the same dark/blue/gold system. */
 .topmint-app-shell > .signupCntn {
   background: var(--tm-landing-bg) !important;
