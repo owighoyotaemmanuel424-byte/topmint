@@ -1,17 +1,3 @@
-import { requireAdmin } from '../../../lib/admin-auth';
-import { prisma } from '../../../lib/db/prisma';
-
-export default async function handler(req, res) {
-  const admin = await requireAdmin(req, res, ['SUPER_ADMIN', 'ADMIN', 'SUPPORT']);
-  if (!admin) return;
-  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
-
-  const logs = await prisma.auditLog.findMany({
-    where: { adminId: admin.id },
-    orderBy: { createdAt: 'desc' },
-    take: 100,
-    include: { admin: { select: { name: true, email: true } } }
-  });
-
-  return res.status(200).json({ logs });
-}
+import {z} from 'zod';import {requireAdmin} from '../../../lib/admin-auth';import {prisma} from '../../../lib/db/prisma';import {respondWithError} from '../../../lib/db-error';
+const n=(v,d,m)=>{const x=Number(v);return Number.isInteger(x)&&x>0?Math.min(x,m):d};
+export default async function handler(req,res){if(req.method!=='GET'){res.setHeader('Allow','GET');return res.status(405).json({error:'Method not allowed'})}const admin=await requireAdmin(req,res,['SUPER_ADMIN','ADMIN','SUPPORT']);if(!admin)return;const p=z.object({q:z.string().max(120).optional()}).safeParse({q:typeof req.query.q==='string'?req.query.q:''});if(!p.success)return res.status(400).json({error:'Invalid filter'});const page=n(req.query.page,1,1000000),limit=n(req.query.limit,30,100),q=p.data.q?.trim();const where=q?{OR:[{action:{contains:q,mode:'insensitive'}},{entity:{contains:q,mode:'insensitive'}},{entityId:{contains:q,mode:'insensitive'}},{admin:{email:{contains:q,mode:'insensitive'}}},{user:{email:{contains:q,mode:'insensitive'}}}]}:{};try{const [total,logs]=await Promise.all([prisma.auditLog.count({where}),prisma.auditLog.findMany({where,orderBy:{createdAt:'desc'},skip:(page-1)*limit,take:limit,select:{id:true,userId:true,adminId:true,action:true,entity:true,entityId:true,metadata:true,createdAt:true,admin:{select:{name:true,email:true,role:true}},user:{select:{email:true,firstName:true,lastName:true}}}})]);return res.status(200).json({logs,pagination:{page,limit,total,totalPages:Math.ceil(total/limit)},hasMore:page*limit<total})}catch(e){return respondWithError(res,e,{fallback:'AUDIT_LOGS_FAILED',message:'Unable to load audit logs.'})}}
