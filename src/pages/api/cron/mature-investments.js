@@ -47,7 +47,7 @@ export default async function handler(req, res) {
           // all wallet/ledger writes share one serializable transaction.
           const claim = await tx.investment.updateMany({
             where: { id: investment.id, status: 'ACTIVE', maturityAt: { lte: now } },
-            data: { status: 'COMPLETED', completedAt: now, actualReturn: investment.expectedReturn },
+            data: { status: 'COMPLETED', completedAt: now, actualReturn: investment.expectedReturn, accruedEarnings: investment.expectedReturn, paidEarnings: investment.expectedReturn },
           });
           if (claim.count !== 1) return null;
 
