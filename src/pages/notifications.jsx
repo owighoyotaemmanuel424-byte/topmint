@@ -160,7 +160,7 @@ export default function Notifications() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#071c18" />
       </Head>
-      <main style={s.page}>
+      <main style={s.page} className="tm-notifications-page">
         <div className="tm-portal-shell">
           <PortalHeader unread={unread} />
 
