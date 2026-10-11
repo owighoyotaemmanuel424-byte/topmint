@@ -33,6 +33,7 @@ const serialize = row => ({
   accountName: row.accountName,
   accountNumber: row.accountNumber,
   processedAt: row.processedAt,
+  metadata: row.transaction?.metadata && typeof row.transaction.metadata === 'object' ? row.transaction.metadata : null,
   createdAt: row.createdAt,
   customer: row.user
     ? { id: row.user.id, email: row.user.email, name: [row.user.firstName, row.user.lastName].filter(Boolean).join(' ') || null }
@@ -61,7 +62,7 @@ export default async function handler(req, res) {
         orderBy: { createdAt: 'asc' },
         take: 100,
         include: {
-          transaction: { select: { reference: true, currency: true, status: true } },
+          transaction: { select: { reference: true, currency: true, status: true, metadata: true } },
           user: { select: { id: true, email: true, firstName: true, lastName: true } },
         },
       });
