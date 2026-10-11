@@ -44,7 +44,7 @@ export default async function handler(req, res) {
       }
       await tx.transaction.updateMany({
         where: { id: deposit.transactionId, userId: user.id, status: 'PENDING' },
-        data: { status: 'CANCELLED', metadata: { cancellation: { cancelledAt: new Date().toISOString(), actor: 'CUSTOMER' } } },
+        data: { status: 'CANCELLED', metadata: { ...(deposit.transaction.metadata && typeof deposit.transaction.metadata === 'object' && !Array.isArray(deposit.transaction.metadata) ? deposit.transaction.metadata : {}), cancellation: { cancelledAt: new Date().toISOString(), actor: 'CUSTOMER' } } },
       });
       await tx.auditLog.create({
         data: {
