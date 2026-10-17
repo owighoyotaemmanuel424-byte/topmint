@@ -76,6 +76,10 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   lastLoginAt DateTime?
+  emailVerifiedAt DateTime?
+  passwordChangedAt DateTime?
+  sessionVersion Int @default(0)
+  passwordResetTokens PasswordResetToken[]
   wallet Wallet?
   investments Investment[]
   transactions Transaction[]
@@ -274,4 +278,17 @@ model AuditLog {
   @@index([userId, createdAt])
   @@index([adminId, createdAt])
   @@index([entity, entityId])
+}
+
+
+model PasswordResetToken {
+  id String @id @default(cuid())
+  userId String
+  tokenHash String @unique
+  expiresAt DateTime
+  consumedAt DateTime?
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, expiresAt])
+  @@index([expiresAt])
 }

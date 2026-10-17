@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     }
 
     await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
-    const token = await createAuthToken(user.id);
+    const token = await createAuthToken(user.id, user.sessionVersion);
     res.setHeader('Set-Cookie', customerSessionCookie(req, token));
     return res.status(200).json({ user: { id: user.id, email: user.email, name: [user.firstName, user.lastName].filter(Boolean).join(' ') } });
   } catch (error) {

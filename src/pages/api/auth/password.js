@@ -43,7 +43,7 @@ export default async function handler(req, res) {
     const userAgent = typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'].slice(0, 300) : null;
 
     await prisma.$transaction(async tx => {
-      await tx.user.update({ where: { id: user.id }, data: { passwordHash } });
+      await tx.user.update({ where: { id: user.id }, data: { passwordHash, passwordChangedAt: new Date(), sessionVersion: { increment: 1 } } });
       await tx.auditLog.create({
         data: { userId: user.id, action: 'password.changed', entity: 'User', entityId: user.id, ipAddress, userAgent },
       });
@@ -59,7 +59,7 @@ export default async function handler(req, res) {
       message: 'Your TopMint account password was changed. If you did not make this change, contact support immediately.',
       resourceType: 'User',
       resourceId: user.id,
-      link: '/profile',
+      link: '/dashboard/security',
     });
 
     return res.status(200).json({ ok: true });
